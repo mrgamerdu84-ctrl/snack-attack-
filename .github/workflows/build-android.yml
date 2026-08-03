@@ -44,6 +44,9 @@ jobs:
       - name: Creer le projet Android
         run: npx cap add android
 
+      - name: Generer la nouvelle icone et le splash natif
+        run: npm run android:assets
+
       - name: Synchroniser le jeu
         run: npx cap sync android
 
@@ -75,4 +78,4 @@ jobs:
           gh release create autonome-latest Snack-Attack-Autonomous.apk \
             --target "$GITHUB_SHA" \
             --title "Snack Attack autonome" \
-            --notes "APK Android autonome de Snack Attack ULTIMATE. Cette version fonctionne sans serveur web. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
+            --notes "APK Android autonome de Snack Attack avec la nouvelle icone, le nouvel ecran de lancement et les voix de combo. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."

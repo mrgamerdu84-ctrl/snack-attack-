@@ -1,11 +1,13 @@
 {
   "name": "snack-attack-ultimate",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Snack Attack ULTIMATE - application Android autonome",
   "scripts": {
-    "prepare:web": "node scripts/prepare-web.mjs",
-    "android:init": "npm run prepare:web && npx cap add android",
+    "prepare:branding": "node scripts/materialize-branding.mjs",
+    "prepare:web": "npm run prepare:branding && node scripts/prepare-web.mjs",
+    "android:assets": "npm run prepare:branding && npx @capacitor/assets generate --android --assetPath resources --iconBackgroundColor '#51107f' --iconBackgroundColorDark '#2b0752' --splashBackgroundColor '#51107f' --splashBackgroundColorDark '#2b0752'",
+    "android:init": "npm run prepare:web && npx cap add android && npm run android:assets",
     "android:sync": "npm run prepare:web && npx cap sync android"
   },
   "dependencies": {
@@ -14,8 +16,10 @@
     "@capacitor-community/text-to-speech": "8.0.2"
   },
   "devDependencies": {
+    "@capacitor/assets": "3.0.5",
     "@capacitor/cli": "8.4.0",
-    "esbuild": "0.28.1"
+    "esbuild": "0.28.1",
+    "sharp": "0.35.3"
   },
   "engines": {
     "node": ">=22"
