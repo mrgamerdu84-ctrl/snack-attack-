@@ -35,11 +35,30 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Installer Capacitor
+      - name: Installer les outils audio
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg espeak unzip curl
+
+      - name: Installer Capacitor et les plugins natifs
         run: npm install --no-audit --no-fund
 
-      - name: Preparer le jeu hors ligne
+      - name: Preparer le jeu et les fichiers audio hors ligne
         run: npm run prepare:web
+
+      - name: Verifier les sons embarques
+        run: |
+          test -s www/audio/music-loop.ogg
+          test -s www/audio/pop.ogg
+          test -s www/audio/bomb.ogg
+          test -s www/audio/rainbow.ogg
+          test -s www/audio/combo.ogg
+          test -s www/audio/super.ogg
+          test -s www/audio/mega.ogg
+          test -s www/audio/legendary.ogg
+          test -s www/native-feedback.js
+          echo "Fichiers audio presents :"
+          find www/audio -maxdepth 1 -type f -printf '%f %s octets\n' | sort
 
       - name: Creer le projet Android
         run: npx cap add android
@@ -47,8 +66,15 @@ jobs:
       - name: Generer la nouvelle icone et le splash natif
         run: npm run android:assets
 
-      - name: Synchroniser le jeu
+      - name: Synchroniser le jeu et les plugins natifs
         run: npx cap sync android
+
+      - name: Verifier les plugins Android
+        run: |
+          grep -R "NativeAudio" android/app/src/main/assets/capacitor.plugins.json
+          grep -R "Haptics" android/app/src/main/assets/capacitor.plugins.json
+          test -s android/app/src/main/assets/public/audio/music-loop.ogg
+          test -s android/app/src/main/assets/public/audio/legendary.ogg
 
       - name: Compiler l APK installable
         working-directory: android
@@ -78,4 +104,4 @@ jobs:
           gh release create autonome-latest Snack-Attack-Autonomous.apk \
             --target "$GITHUB_SHA" \
             --title "Snack Attack autonome" \
-            --notes "APK Android autonome de Snack Attack avec la nouvelle icone, le nouvel ecran de lancement et les voix de combo. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
+            --notes "Snack Attack avec musique, annonces, effets sonores et vibrations Android natifs. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."

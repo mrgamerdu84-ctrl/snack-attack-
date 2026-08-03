@@ -18,7 +18,8 @@ const requiredFiles = [
   'game-play.js',
   'voice-combos.js',
   'voice-controls.js',
-  'v2-system.js'
+  'v2-system.js',
+  'audio-fix.js'
 ];
 
 const optionalDirectories = ['assets', 'images', 'audio'];
@@ -53,4 +54,15 @@ await build({
   sourcemap: false
 });
 
-console.log('Snack Attack V2, son, progression et écran de lancement préparés dans www/.');
+await build({
+  entryPoints: [resolve(rootDir, 'src/native-feedback.js')],
+  bundle: true,
+  outfile: resolve(webDir, 'native-feedback.js'),
+  format: 'iife',
+  platform: 'browser',
+  target: ['es2020'],
+  minify: true,
+  sourcemap: false
+});
+
+console.log('Snack Attack V2, audio natif, vibrations, progression et écran de lancement préparés dans www/.');

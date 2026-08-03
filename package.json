@@ -1,11 +1,12 @@
 {
   "name": "snack-attack-ultimate",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
-  "description": "Snack Attack V2 - application Android autonome avec mondes, boosters et musique",
+  "description": "Snack Attack V2 - application Android autonome avec audio et vibrations natifs",
   "scripts": {
     "prepare:branding": "node scripts/materialize-branding.mjs",
-    "prepare:web": "npm run prepare:branding && node scripts/prepare-web.mjs",
+    "prepare:audio": "bash scripts/prepare-voice-assets.sh && python3 scripts/generate_audio.py",
+    "prepare:web": "npm run prepare:branding && npm run prepare:audio && node scripts/prepare-web.mjs",
     "android:assets": "npm run prepare:branding && npx @capacitor/assets generate --android --assetPath resources --iconBackgroundColor '#51107f' --iconBackgroundColorDark '#2b0752' --splashBackgroundColor '#51107f' --splashBackgroundColorDark '#2b0752'",
     "android:init": "npm run prepare:web && npx cap add android && npm run android:assets",
     "android:sync": "npm run prepare:web && npx cap sync android"
@@ -13,6 +14,8 @@
   "dependencies": {
     "@capacitor/android": "8.4.0",
     "@capacitor/core": "8.4.0",
+    "@capacitor/haptics": "8.0.2",
+    "@capacitor-community/native-audio": "8.0.0",
     "@capacitor-community/text-to-speech": "8.0.2"
   },
   "devDependencies": {
