@@ -12,7 +12,9 @@ const requiredFiles = [
   'style.css',
   'game-core.js',
   'game-effects.js',
-  'game-play.js'
+  'game-play.js',
+  'voice-combos.js',
+  'voice-controls.js'
 ];
 
 const optionalDirectories = ['assets', 'images', 'audio'];
