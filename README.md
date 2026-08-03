@@ -9,6 +9,7 @@ La compilation automatique produit :
 - `Snack-Attack-Autonomous.apk`
 - un artefact GitHub Actions conserve pendant 30 jours
 - une Release permanente nommee **Snack Attack autonome**
+- une verification complete de la compilation Android sur chaque pull request
 
 ## Identifiant Android
 
