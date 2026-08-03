@@ -11,12 +11,14 @@ const requiredFiles = [
   'index.html',
   'style.css',
   'branding.css',
+  'v2.css',
   'branding.js',
   'game-core.js',
   'game-effects.js',
   'game-play.js',
   'voice-combos.js',
-  'voice-controls.js'
+  'voice-controls.js',
+  'v2-system.js'
 ];
 
 const optionalDirectories = ['assets', 'images', 'audio'];
@@ -51,4 +53,4 @@ await build({
   sourcemap: false
 });
 
-console.log('Jeu, écran de lancement et moteur vocal préparés dans www/.');
+console.log('Snack Attack V2, son, progression et écran de lancement préparés dans www/.');
