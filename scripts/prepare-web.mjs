@@ -10,6 +10,8 @@ const webDir = resolve(rootDir, 'www');
 const requiredFiles = [
   'index.html',
   'style.css',
+  'branding.css',
+  'branding.js',
   'game-core.js',
   'game-effects.js',
   'game-play.js',
@@ -49,4 +51,4 @@ await build({
   sourcemap: false
 });
 
-console.log('Fichiers web et moteur vocal Android préparés dans www/.');
+console.log('Jeu, écran de lancement et moteur vocal préparés dans www/.');
