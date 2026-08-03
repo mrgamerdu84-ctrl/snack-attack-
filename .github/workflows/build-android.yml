@@ -1,0 +1,76 @@
+name: Construire l APK Android
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: snack-attack-android
+  cancel-in-progress: true
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le projet
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Installer Capacitor
+        run: npm install --no-audit --no-fund
+
+      - name: Preparer le jeu hors ligne
+        run: npm run prepare:web
+
+      - name: Creer le projet Android
+        run: npx cap add android
+
+      - name: Synchroniser le jeu
+        run: npx cap sync android
+
+      - name: Compiler l APK installable
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Renommer l APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Snack-Attack-Autonomous.apk
+
+      - name: Publier l artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Snack-Attack-Autonomous
+          path: Snack-Attack-Autonomous.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Mettre a jour le telechargement permanent
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view autonome-latest >/dev/null 2>&1; then
+            gh release delete autonome-latest --cleanup-tag --yes
+          fi
+          gh release create autonome-latest Snack-Attack-Autonomous.apk \
+            --target "$GITHUB_SHA" \
+            --title "Snack Attack autonome" \
+            --notes "APK Android autonome de Snack Attack ULTIMATE. Cette version fonctionne sans serveur web. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
