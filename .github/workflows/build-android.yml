@@ -34,7 +34,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-          cache: gradle
 
       - name: Installer Capacitor
         run: npm install --no-audit --no-fund
