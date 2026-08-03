@@ -1,6 +1,7 @@
 import { cp, mkdir, rm, stat } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { build } from 'esbuild';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(scriptDir, '..');
@@ -35,4 +36,15 @@ for (const directory of optionalDirectories) {
   }
 }
 
-console.log('Fichiers web préparés dans www/.');
+await build({
+  entryPoints: [resolve(rootDir, 'src/native-tts.js')],
+  bundle: true,
+  outfile: resolve(webDir, 'native-tts.js'),
+  format: 'iife',
+  platform: 'browser',
+  target: ['es2020'],
+  minify: true,
+  sourcemap: false
+});
+
+console.log('Fichiers web et moteur vocal Android préparés dans www/.');
