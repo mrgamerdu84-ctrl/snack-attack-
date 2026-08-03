@@ -7,6 +7,7 @@
 <title>Snack Attack</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="branding.css">
+<link rel="stylesheet" href="v2.css">
 </head>
 <body class="theme-fruits">
 <div id="appSplash" aria-label="Chargement de Snack Attack">
@@ -16,8 +17,8 @@
 <div class="start-menu" id="startMenu">
 <div class="start-card">
 <h1>🍬 Snack Attack</h1>
-<div style="color:#ffb700;font-family:Fredoka,sans-serif;font-weight:900;margin-top:4px;font-size:14px;letter-spacing:1px">👑 ULTIMATE EDITION 👑</div>
-<div class="start-sub"><b>LASERS + SLOW-MO + COMBO x2 x3 + SHAKE + CONFETTIS + PARTICULES</b><br>Touche un groupe → tout explose en mode cinéma !</div>
+<div style="color:#ffb700;font-family:Fredoka,sans-serif;font-weight:900;margin-top:4px;font-size:14px;letter-spacing:1px">🌟 VERSION 2 • AVENTURE GOURMANDE 🌟</div>
+<div class="start-sub"><b>25 NIVEAUX + BOOSTERS + MUSIQUE + MONDES + RÉCOMPENSES</b><br>Crée des snacks spéciaux et déclenche des réactions en chaîne !</div>
 <input id="pseudo" class="pseudo" placeholder="Ton pseudo" maxlength="14">
 <div class="avatar-row" id="avatarRow"></div>
 <div class="theme-grid">
@@ -27,14 +28,14 @@
 <button class="t-card" data-theme="glace"><span style="font-size:22px">🍦🍨🍧</span>Glace</button>
 <button class="t-card" data-theme="fastfood"><span style="font-size:22px">🍕🍟🍔</span>Fast-food</button>
 </div>
-<button class="mainbtn" id="playBtn" disabled style="width:100%;padding:14px;font-size:15px">JOUER ULTIMATE 👑💥</button>
+<button class="mainbtn" id="playBtn" disabled style="width:100%;padding:14px;font-size:15px">CONTINUER L’AVENTURE 🚀</button>
 </div>
 </div>
 
 <div class="wrap" id="gameWrap" style="display:none">
 <div class="banner">
 <h1>🍬 Snack Attack</h1>
-<div class="mode-badge">👑 ULTIMATE • LASER • SLOWMO • COMBO</div>
+<div class="mode-badge">🌟 V2 • BOOSTERS • COMBOS • AVENTURE</div>
 <div class="subtitle" id="welcome"></div>
 </div>
 <div class="hud">
@@ -55,15 +56,15 @@
 </div>
 <div class="msg" id="msg">Touche un groupe de 2+ 💥</div>
 <div class="footer">
-<button class="mainbtn" id="voiceBtn" style="background:linear-gradient(160deg,#3ee6b0,#4fc3ff)">🔊 Voix ON</button>
+<button class="mainbtn" id="voiceBtn" style="background:linear-gradient(160deg,#3ee6b0,#4fc3ff)">📣 Annonce ON</button>
 <button class="mainbtn" id="backBtn" style="background:linear-gradient(160deg,#8a7aff,#a855f7)">↩️ Menu</button>
 <button class="mainbtn" id="shuffleBtn">🔀 Mélanger (2)</button>
-<button class="mainbtn" id="restartBtn">🔄 Restart</button>
+<button class="mainbtn" id="restartBtn">🔄 Recommencer</button>
 </div>
 </div>
 
 <div class="overlay" id="ovWin"><div class="o-card"><div style="font-size:60px">👑</div><h2 style="font-family:Fredoka,sans-serif;color:var(--lemon);margin:8px 0">Niveau <span id="winLvl">1</span> !</h2><div id="winTxt" style="font-size:13px;opacity:0.9;margin-bottom:14px"></div><button class="mainbtn" id="nextBtn" style="width:100%">Niveau suivant ➡️</button></div></div>
-<div class="overlay" id="ovLose"><div class="o-card"><div style="font-size:56px">💥</div><h2 style="font-family:Fredoka,sans-serif;color:var(--lemon)">Game Over</h2><div id="loseTxt" style="font-size:13px;opacity:0.85;margin:10px 0 14px"></div><button class="mainbtn" id="retryBtn" style="width:100%">Recommencer 🔄</button></div></div>
+<div class="overlay" id="ovLose"><div class="o-card"><div style="font-size:56px">💥</div><h2 style="font-family:Fredoka,sans-serif;color:var(--lemon)">Partie terminée</h2><div id="loseTxt" style="font-size:13px;opacity:0.85;margin:10px 0 14px"></div><button class="mainbtn" id="retryBtn" style="width:100%">Réessayer 🔄</button></div></div>
 
 <script src="branding.js"></script>
 <script src="native-tts.js"></script>
@@ -72,5 +73,6 @@
 <script src="game-effects.js"></script>
 <script src="game-play.js"></script>
 <script src="voice-controls.js"></script>
+<script src="v2-system.js"></script>
 </body>
 </html>
