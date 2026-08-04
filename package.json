@@ -1,11 +1,11 @@
 {
   "name": "snack-attack-ultimate",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
-  "description": "Snack Attack - aventure, mode détente et projections plein écran",
+  "description": "Snack Attack - aventure, mode détente, projections plein écran et musique fournie",
   "scripts": {
     "prepare:branding": "node scripts/materialize-branding.mjs",
-    "prepare:audio": "bash scripts/prepare-voice-assets.sh && python3 scripts/generate_audio.py && bash scripts/ensure-music-mp3.sh",
+    "prepare:audio": "bash scripts/prepare-voice-assets.sh && python3 scripts/generate_audio.py && node scripts/materialize-user-music.mjs",
     "prepare:web": "npm run prepare:branding && npm run prepare:audio && node scripts/prepare-web.mjs && node scripts/patch-v2-relax.mjs",
     "prepare:android-feedback": "node scripts/prepare-android-feedback.mjs",
     "android:assets": "npm run prepare:branding && npx @capacitor/assets generate --android --assetPath resources --iconBackgroundColor '#51107f' --iconBackgroundColorDark '#2b0752' --splashBackgroundColor '#51107f' --splashBackgroundColorDark '#2b0752'",
