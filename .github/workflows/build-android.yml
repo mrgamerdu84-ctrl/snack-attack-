@@ -71,7 +71,12 @@ jobs:
         run: npx cap sync android
 
       - name: Preparer sons et vibration
-        run: npm run prepare:android-feedback
+        run: |
+          if [ ! -s audio/music-loop.mp3 ] && [ -s audio/music-loop.ogg ]; then
+            ffmpeg -y -loglevel error -i audio/music-loop.ogg -codec:a libmp3lame -b:a 128k audio/music-loop.mp3
+          fi
+          test -s audio/music-loop.mp3
+          npm run prepare:android-feedback
 
       - name: Compiler l APK
         working-directory: android
