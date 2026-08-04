@@ -14,6 +14,7 @@ const requiredFiles = [
   'v2.css',
   'theme-effects.css',
   'screen-splashes.css',
+  'glass-crash-extension.css',
   'branding.js',
   'game-core.js',
   'game-effects.js',
@@ -23,7 +24,8 @@ const requiredFiles = [
   'v2-system.js',
   'audio-fix.js',
   'theme-effects.js',
-  'screen-splashes.js'
+  'screen-splashes.js',
+  'glass-crash-extension.js'
 ];
 
 const optionalDirectories = ['assets', 'images', 'audio'];
@@ -69,4 +71,4 @@ await build({
   sourcemap: false
 });
 
-console.log('Snack Attack avec mode détente et projections plein écran préparé dans www/.');
+console.log('Snack Attack avec mode détente, catégories étendues et effets de vitre préparé dans www/.');
