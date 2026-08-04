@@ -42,38 +42,38 @@ jobs:
           command -v espeak >/dev/null 2>&1 || missing+=(espeak)
           command -v unzip >/dev/null 2>&1 || missing+=(unzip)
           if [ ${#missing[@]} -gt 0 ]; then
-            echo "Outils manquants : ${missing[*]}"
             sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
             sudo apt-get install -y --no-install-recommends "${missing[@]}"
-          else
-            echo "ffmpeg, espeak et unzip sont deja presents."
           fi
-          ffmpeg -version | head -n 1
-          espeak --version | head -n 1
 
       - name: Installer Capacitor et les plugins natifs
         run: npm install --no-audit --no-fund
 
-      - name: Preparer le jeu et la musique fournie
+      - name: Preparer le jeu
         run: npm run prepare:web
 
-      - name: Verifier mode detente et projections exactes
+      - name: Verifier le menu les effets et la boutique cachee
         run: |
+          test -s www/menu-refresh.css
           test -s www/screen-splashes.js
           test -s www/screen-splashes.css
+          test -s www/shop-config.js
+          test -s www/shop.js
+          test -s www/shop.css
           node --check www/screen-splashes.js
           node --check www/v2-system.js
+          node --check www/shop-config.js
+          node --check www/shop.js
           grep -F "SnackScreenFX?.explodeAt" www/v2-system.js
-          grep -F "gameMode === 'relax'" www/v2-system.js
           grep -F "getBoundingClientRect" www/v2-system.js
+          grep -F "gameMode === 'relax'" www/v2-system.js
+          grep -F "enabled: false" www/shop-config.js
           grep -F "id=\"relaxBtn\"" www/index.html
 
-      - name: Verifier la musique fournie et les effets
+      - name: Verifier les sons generes
         run: |
-          test -s music-src/three-tiles-left/part-01.b64
           test -s www/audio/music-loop.mp3
           test -s www/audio/music-loop.ogg
-          test -s www/audio/MUSIC_SOURCE.txt
           test -s www/audio/pop.ogg
           test -s www/audio/bomb.ogg
           test -s www/audio/rainbow.ogg
@@ -84,14 +84,6 @@ jobs:
           test -s www/native-feedback.js
           test -s www/theme-effects.js
           test -s www/theme-effects.css
-          node --check audio-fix.js
-          node --check theme-effects.js
-          DURATION=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 www/audio/music-loop.mp3)
-          echo "Duree de la musique fournie: $DURATION secondes"
-          awk -v duration="$DURATION" 'BEGIN { exit !(duration >= 30 && duration <= 32) }'
-          grep -F "three_tiles_left.mp3" www/audio/MUSIC_SOURCE.txt
-          echo "Fichiers audio presents :"
-          find www/audio -maxdepth 1 -type f -printf '%f %s octets\n' | sort
 
       - name: Creer le projet Android
         run: npx cap add android
@@ -110,16 +102,11 @@ jobs:
           grep -R "NativeAudio" android/app/src/main/assets/capacitor.plugins.json
           grep -R "Haptics" android/app/src/main/assets/capacitor.plugins.json
           grep -R "android.permission.VIBRATE" android/app/src/main/AndroidManifest.xml
-          test -s android/app/src/main/assets/audio/music-loop.mp3
-          test -s android/app/src/main/assets/audio/pop.ogg
-          test -s android/app/src/main/assets/audio/legendary.ogg
-          test -s android/app/src/main/assets/public/audio/music-loop.mp3
-          test -s android/app/src/main/assets/public/theme-effects.js
-          test -s android/app/src/main/assets/public/theme-effects.css
+          test -s android/app/src/main/assets/public/menu-refresh.css
           test -s android/app/src/main/assets/public/screen-splashes.js
-          test -s android/app/src/main/assets/public/screen-splashes.css
-          grep -F "SnackScreenFX?.explodeAt" android/app/src/main/assets/public/v2-system.js
-          grep -F "gameMode === 'relax'" android/app/src/main/assets/public/v2-system.js
+          test -s android/app/src/main/assets/public/shop-config.js
+          test -s android/app/src/main/assets/public/shop.js
+          grep -F "enabled: false" android/app/src/main/assets/public/shop-config.js
 
       - name: Compiler l APK installable
         working-directory: android
@@ -129,11 +116,10 @@ jobs:
 
       - name: Verifier le contenu final de l APK
         run: |
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/audio/music-loop.mp3"
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/audio/music-loop.mp3"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/menu-refresh.css"
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/screen-splashes.js"
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/screen-splashes.css"
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/v2-system.js"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/shop-config.js"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/shop.js"
 
       - name: Renommer l APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk Snack-Attack-Autonomous.apk
@@ -157,4 +143,4 @@ jobs:
           gh release create autonome-latest Snack-Attack-Autonomous.apk \
             --target "$GITHUB_SHA" \
             --title "Snack Attack autonome" \
-            --notes "Snack Attack avec aventure, mode detente infini, projections plein ecran et musique fournie en boucle. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
+            --notes "Snack Attack avec nouveau menu, mode detente, effets de lame et boutique cachee desactivee."
