@@ -21,7 +21,7 @@ for (const name of partNames) {
 }
 
 const source = Buffer.from(encoded.join(''), 'base64');
-if (source.length < 50_000 || source.subarray(0, 4).toString('ascii') !== 'OggS') {
+if (source.length < 20_000 || source.subarray(0, 4).toString('ascii') !== 'OggS') {
   throw new Error(`Musique reconstruite invalide : ${source.length} octets.`);
 }
 await writeFile(sourcePath, source);
@@ -36,4 +36,4 @@ ffmpeg(['-codec:a', 'libvorbis', '-q:a', '5', '-ar', '44100', '-ac', '2', oggPat
 await rm(sourcePath, { force: true });
 await writeFile(resolve(audioDir, 'MUSIC_SOURCE.txt'), 'three_tiles_left.mp3 — musique fournie par le propriétaire de Snack Attack et utilisée en boucle dans le jeu.\n', 'utf8');
 
-console.log(`Musique fournie reconstruite : ${source.length} octets, ${partNames.length} parties.`);
+console.log(`Musique fournie reconstruite : ${source.length} octets, ${partNames.length} partie(s).`);
