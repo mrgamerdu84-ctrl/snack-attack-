@@ -12,6 +12,7 @@ const requiredFiles = [
   'style.css',
   'branding.css',
   'v2.css',
+  'theme-effects.css',
   'branding.js',
   'game-core.js',
   'game-effects.js',
@@ -19,7 +20,8 @@ const requiredFiles = [
   'voice-combos.js',
   'voice-controls.js',
   'v2-system.js',
-  'audio-fix.js'
+  'audio-fix.js',
+  'theme-effects.js'
 ];
 
 const optionalDirectories = ['assets', 'images', 'audio'];
@@ -65,4 +67,4 @@ await build({
   sourcemap: false
 });
 
-console.log('Snack Attack V2, audio natif, vibrations, progression et écran de lancement préparés dans www/.');
+console.log('Snack Attack V2, musique MP3, vibrations renforcées et effets visuels par thème préparés dans www/.');
