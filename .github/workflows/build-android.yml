@@ -46,6 +46,17 @@ jobs:
       - name: Preparer le jeu et les fichiers audio hors ligne
         run: npm run prepare:web
 
+      - name: Verifier mode detente et projections exactes
+        run: |
+          test -s www/screen-splashes.js
+          test -s www/screen-splashes.css
+          node --check www/screen-splashes.js
+          node --check www/v2-system.js
+          grep -F "SnackScreenFX?.explodeAt" www/v2-system.js
+          grep -F "gameMode === 'relax'" www/v2-system.js
+          grep -F "getBoundingClientRect" www/v2-system.js
+          grep -F "id=\"relaxBtn\"" www/index.html
+
       - name: Verifier la musique et les effets de themes
         run: |
           test -s www/audio/music-loop.mp3
@@ -88,6 +99,10 @@ jobs:
           test -s android/app/src/main/assets/public/audio/music-loop.mp3
           test -s android/app/src/main/assets/public/theme-effects.js
           test -s android/app/src/main/assets/public/theme-effects.css
+          test -s android/app/src/main/assets/public/screen-splashes.js
+          test -s android/app/src/main/assets/public/screen-splashes.css
+          grep -F "SnackScreenFX?.explodeAt" android/app/src/main/assets/public/v2-system.js
+          grep -F "gameMode === 'relax'" android/app/src/main/assets/public/v2-system.js
 
       - name: Compiler l APK installable
         working-directory: android
@@ -98,8 +113,9 @@ jobs:
       - name: Verifier le contenu final de l APK
         run: |
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/audio/music-loop.mp3"
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/theme-effects.js"
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/theme-effects.css"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/screen-splashes.js"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/screen-splashes.css"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/v2-system.js"
 
       - name: Renommer l APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk Snack-Attack-Autonomous.apk
@@ -123,4 +139,4 @@ jobs:
           gh release create autonome-latest Snack-Attack-Autonomous.apk \
             --target "$GITHUB_SHA" \
             --title "Snack Attack autonome" \
-            --notes "Snack Attack avec musique MP3 relancee au toucher, vibration Android renforcee et explosions visuelles propres a chaque theme. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
+            --notes "Snack Attack avec aventure, mode detente infini et projections plein ecran declenchees depuis chaque snack detruit. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
