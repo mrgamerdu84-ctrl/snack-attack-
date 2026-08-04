@@ -1,5 +1,40 @@
 (() => {
+  const PROFILES = {
+    '🍓': { color: '#e63946', accent: '#ff758f', shape: 'pulp' },
+    '🍊': { color: '#ff7a00', accent: '#ffc145', shape: 'pulp' },
+    '🍇': { color: '#7b2cbf', accent: '#c77dff', shape: 'berry' },
+    '🍋': { color: '#ffd60a', accent: '#fff3a3', shape: 'pulp' },
+    '🍒': { color: '#c1121f', accent: '#ff4d6d', shape: 'berry' },
+    '🍑': { color: '#ff8fab', accent: '#ffd0dc', shape: 'pulp' },
+    '🥕': { color: '#f77f00', accent: '#ffb703', shape: 'chip' },
+    '🌽': { color: '#ffd60a', accent: '#8ac926', shape: 'kernel' },
+    '🍆': { color: '#6a1b9a', accent: '#ab47bc', shape: 'chip' },
+    '🥒': { color: '#43a047', accent: '#b7e4c7', shape: 'chip' },
+    '🍅': { color: '#e63946', accent: '#ff758f', shape: 'pulp' },
+    '🫑': { color: '#2d9d45', accent: '#f94144', shape: 'chip' },
+    '🥐': { color: '#c9792b', accent: '#ffd089', shape: 'crumb' },
+    '🥞': { color: '#c97b2d', accent: '#f4c27a', shape: 'crumb' },
+    '🍩': { color: '#ff70a6', accent: '#8d5524', shape: 'crumb' },
+    '🧇': { color: '#c9822c', accent: '#f2c078', shape: 'crumb' },
+    '🥯': { color: '#b66a2c', accent: '#f0c58f', shape: 'crumb' },
+    '🍪': { color: '#9c5b2c', accent: '#5f3216', shape: 'crumb' },
+    '🍦': { color: '#fff0f6', accent: '#ff9fcb', shape: 'cream' },
+    '🍨': { color: '#f8c8dc', accent: '#bde0fe', shape: 'cream' },
+    '🍧': { color: '#80e1ff', accent: '#ff70a6', shape: 'ice' },
+    '🧁': { color: '#ff9fcb', accent: '#f4c27a', shape: 'cream' },
+    '🍰': { color: '#fff0d6', accent: '#ff758f', shape: 'cake' },
+    '🍭': { color: '#ff4d6d', accent: '#4cc9f0', shape: 'sugar' },
+    '🍕': { color: '#f94144', accent: '#ffd166', shape: 'sauce' },
+    '🍟': { color: '#fcbf49', accent: '#e63946', shape: 'strip' },
+    '🍔': { color: '#8d5524', accent: '#ffd166', shape: 'crumb' },
+    '🌮': { color: '#d28b36', accent: '#6a994e', shape: 'crumb' },
+    '🍿': { color: '#fff3b0', accent: '#e63946', shape: 'crumb' },
+    '🌭': { color: '#c1121f', accent: '#fcbf49', shape: 'sauce' }
+  };
+
   let overlay = null;
+  const random = (min, max) => min + Math.random() * (max - min);
+  const cleanup = (node, delay) => window.setTimeout(() => node.remove(), delay);
 
   function ensureOverlay() {
     if (overlay?.isConnected) return overlay;
@@ -10,85 +45,64 @@
     return overlay;
   }
 
-  const random = (min, max) => min + Math.random() * (max - min);
-  const cleanup = (node, delay = 1500) => window.setTimeout(() => node.remove(), delay);
-
-  function addSlash(x, y, power) {
-    const slash = document.createElement('span');
-    slash.className = 'slice-slash';
-    slash.style.left = `${x}px`;
-    slash.style.top = `${y}px`;
-    slash.style.setProperty('--slash-length', `${random(150, 245) * power}px`);
-    slash.style.setProperty('--slash-angle', `${random(-48, 48)}deg`);
-    ensureOverlay().appendChild(slash);
-    cleanup(slash, 700);
+  function addFoodChunk(x, y, snack, intensity) {
+    const profile = PROFILES[snack] || { color: '#ff5964', accent: '#ffd166', shape: 'pulp' };
+    const angle = random(-Math.PI * 0.92, -Math.PI * 0.08);
+    const distance = random(90, 235) * intensity;
+    const chunk = document.createElement('span');
+    chunk.className = `food-impact-chunk food-${profile.shape}`;
+    chunk.textContent = snack;
+    chunk.style.left = `${x}px`;
+    chunk.style.top = `${y}px`;
+    chunk.style.setProperty('--food-color', profile.color);
+    chunk.style.setProperty('--food-accent', profile.accent);
+    chunk.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+    chunk.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+    chunk.style.setProperty('--fall', `${random(90, 210)}px`);
+    chunk.style.setProperty('--size', `${random(18, 32) * Math.min(intensity, 1.45)}px`);
+    chunk.style.setProperty('--spin', `${random(-760, 760)}deg`);
+    chunk.style.setProperty('--duration', `${random(760, 1120)}ms`);
+    ensureOverlay().appendChild(chunk);
+    cleanup(chunk, 1300);
   }
 
-  function addBurst(x, y, power) {
-    const burst = document.createElement('span');
-    burst.className = 'slice-burst';
-    burst.style.left = `${x}px`;
-    burst.style.top = `${y}px`;
-    burst.style.setProperty('--burst-size', `${random(72, 112) * power}px`);
-    burst.style.setProperty('--burst-angle', `${random(-20, 20)}deg`);
-    ensureOverlay().appendChild(burst);
-    cleanup(burst, 1200);
+  function addSplat(x, y, snack, intensity) {
+    const profile = PROFILES[snack] || { color: '#ff5964', accent: '#ffd166' };
+    const splat = document.createElement('span');
+    splat.className = 'food-impact-splat';
+    splat.style.left = `${x}px`;
+    splat.style.top = `${y}px`;
+    splat.style.setProperty('--food-color', profile.color);
+    splat.style.setProperty('--food-accent', profile.accent);
+    splat.style.setProperty('--splat-size', `${random(74, 120) * intensity}px`);
+    splat.style.setProperty('--splat-rotate', `${random(-30, 30)}deg`);
+    ensureOverlay().appendChild(splat);
+    cleanup(splat, 1450);
   }
 
-  function addDrop(x, y, power) {
-    const angle = random(-Math.PI * 0.95, Math.PI * 0.2);
-    const distance = random(55, 190) * power;
-    const drop = document.createElement('span');
-    drop.className = 'slice-drop';
-    drop.style.left = `${x}px`;
-    drop.style.top = `${y}px`;
-    drop.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
-    drop.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
-    drop.style.setProperty('--fall', `${random(55, 170)}px`);
-    drop.style.setProperty('--drop-size', `${random(4, 12) * Math.min(power, 1.4)}px`);
-    drop.style.setProperty('--drop-rotate', `${random(-540, 540)}deg`);
-    drop.style.setProperty('--drop-duration', `${random(620, 1050)}ms`);
-    ensureOverlay().appendChild(drop);
-    cleanup(drop, 1250);
+  function addGlassCrack(x, y, comboSize) {
+    const crack = document.createElement('span');
+    crack.className = `combo-glass-crack crack-tier-${comboSize >= 9 ? 3 : comboSize >= 7 ? 2 : 1}`;
+    crack.style.left = `${x}px`;
+    crack.style.top = `${y}px`;
+    crack.style.setProperty('--crack-size', `${Math.min(285, 145 + comboSize * 13)}px`);
+    crack.style.setProperty('--crack-rotate', `${random(-24, 24)}deg`);
+    ensureOverlay().appendChild(crack);
+    cleanup(crack, comboSize >= 9 ? 1900 : 1450);
   }
 
-  function addShard(x, y, power) {
-    const angle = random(0, Math.PI * 2);
-    const distance = random(48, 155) * power;
-    const shard = document.createElement('span');
-    shard.className = 'slice-shard';
-    shard.style.left = `${x}px`;
-    shard.style.top = `${y}px`;
-    shard.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
-    shard.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
-    shard.style.setProperty('--shard-size', `${random(7, 16) * Math.min(power, 1.35)}px`);
-    shard.style.setProperty('--shard-rotate', `${random(-760, 760)}deg`);
-    shard.style.setProperty('--shard-duration', `${random(520, 900)}ms`);
-    ensureOverlay().appendChild(shard);
-    cleanup(shard, 1050);
+  function comboImpact({ x, y, snack, comboSize = 4, crack = false, intensity = 1 }) {
+    if (!Number.isFinite(x) || !Number.isFinite(y) || comboSize < 4) return;
+    const power = Math.max(0.85, Math.min(1.6, intensity));
+    addFoodChunk(x, y, snack, power);
+    if (Math.random() > 0.35) addFoodChunk(x, y, snack, power * 0.82);
+    if (crack) {
+      addSplat(x, y, snack, power);
+      addGlassCrack(x, y, comboSize);
+      document.body.classList.add('combo-impact-focus');
+      window.setTimeout(() => document.body.classList.remove('combo-impact-focus'), 260);
+    }
   }
 
-  function addMist(x, y, power) {
-    const mist = document.createElement('span');
-    mist.className = 'slice-mist';
-    mist.style.left = `${x}px`;
-    mist.style.top = `${y}px`;
-    mist.style.setProperty('--mist-size', `${random(110, 175) * power}px`);
-    ensureOverlay().appendChild(mist);
-    cleanup(mist, 900);
-  }
-
-  function explodeAt({ x, y, intensity = 1 }) {
-    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-    const power = Math.max(0.8, Math.min(1.8, intensity));
-    addSlash(x, y, power);
-    addBurst(x, y, power);
-    addMist(x, y, power);
-    const drops = Math.round(12 + power * 8);
-    const shards = Math.round(6 + power * 5);
-    for (let i = 0; i < drops; i += 1) addDrop(x, y, power);
-    for (let i = 0; i < shards; i += 1) addShard(x, y, power);
-  }
-
-  window.SnackScreenFX = { explodeAt };
+  window.SnackScreenFX = { comboImpact };
 })();
