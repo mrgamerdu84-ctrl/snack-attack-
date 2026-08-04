@@ -23,13 +23,19 @@ const orderedParts = [
 await mkdir(audioDir, { recursive: true });
 const base64Parts = [];
 for (const [index, path] of orderedParts.entries()) {
-  const part = (await readFile(path, 'utf8')).trim();
   const expectedLength = index < 3 ? 20_000 : index < 12 ? 4_000 : 524;
-  if (part.length !== expectedLength) {
-    throw new Error(`Bloc musical ${index + 1} invalide : ${part.length} caractères au lieu de ${expectedLength}.`);
+  const raw = await readFile(path, 'utf8');
+  const compact = raw.replace(/\s+/g, '');
+  if (compact.length < expectedLength) {
+    throw new Error(`Bloc musical ${index + 1} incomplet : ${compact.length} caractères au lieu d’au moins ${expectedLength}.`);
   }
+
+  const part = compact.slice(0, expectedLength);
   if (!/^[A-Za-z0-9+/]+={0,2}$/.test(part)) {
-    throw new Error(`Bloc musical ${index + 1} contient des caractères non valides.`);
+    throw new Error(`Bloc musical ${index + 1} contient des caractères non valides dans sa partie utile.`);
+  }
+  if (compact.length > expectedLength) {
+    console.warn(`Bloc musical ${index + 1} : ${compact.length - expectedLength} caractère(s) superflu(s) ignoré(s).`);
   }
   base64Parts.push(part);
 }
