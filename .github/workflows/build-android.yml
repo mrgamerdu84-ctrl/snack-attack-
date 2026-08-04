@@ -61,19 +61,18 @@ jobs:
           test -s www/native-feedback.js
           test -s www/theme-effects.js
           test -s www/theme-effects.css
-          test -s www/glass-effects.js
-          test -s www/glass-effects.css
           test -s www/relax-mode.js
           test -s www/relax-mode.css
           node --check audio-fix.js
           node --check theme-effects.js
-          node --check glass-effects.js
           node --check relax-mode.js
           DURATION=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 www/audio/music-loop.mp3)
           echo "Duree de la musique fournie: $DURATION secondes"
           awk -v duration="$DURATION" 'BEGIN { exit !(duration >= 30 && duration <= 32) }'
-          grep -q "createParticlesWithExactGlassImpact" glass-effects.js
+          grep -q "createParticlesWithExactGlassSplash" theme-effects.js
+          grep -q "splashFromBoard" theme-effects.js
           grep -q "MODE DÉTENTE" relax-mode.js
+          grep -q "Sans niveau, sans chrono" relax-mode.js
           echo "Fichiers audio presents :"
           find www/audio -maxdepth 1 -type f -printf '%f %s octets\n' | sort
 
@@ -98,8 +97,8 @@ jobs:
           test -s android/app/src/main/assets/audio/pop.ogg
           test -s android/app/src/main/assets/audio/legendary.ogg
           test -s android/app/src/main/assets/public/audio/music-loop.mp3
-          test -s android/app/src/main/assets/public/glass-effects.js
-          test -s android/app/src/main/assets/public/glass-effects.css
+          test -s android/app/src/main/assets/public/theme-effects.js
+          test -s android/app/src/main/assets/public/theme-effects.css
           test -s android/app/src/main/assets/public/relax-mode.js
           test -s android/app/src/main/assets/public/relax-mode.css
 
@@ -112,8 +111,8 @@ jobs:
       - name: Verifier le contenu final de l APK
         run: |
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/audio/music-loop.mp3"
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/glass-effects.js"
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/glass-effects.css"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/theme-effects.js"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/theme-effects.css"
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/relax-mode.js"
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/relax-mode.css"
 
@@ -139,4 +138,4 @@ jobs:
           gh release create autonome-latest Snack-Attack-Autonomous.apk \
             --target "$GITHUB_SHA" \
             --title "Snack Attack autonome" \
-            --notes "Snack Attack avec musique fournie en boucle, mode Detente infini et projections exactes sur la vitre selon chaque snack. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
+            --notes "Snack Attack avec la musique fournie en boucle, le mode Detente infini et les projections exactes sur la vitre selon chaque snack. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
