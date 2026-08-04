@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const root = resolve(import.meta.dirname, '..');
@@ -20,23 +20,31 @@ const orderedParts = [
   ...Array.from({ length: 10 }, (_, index) => resolve(tailDir, `tail-${String(index).padStart(2, '0')}.b64`)),
 ];
 
+function expectedLengthFor(path) {
+  const name = basename(path);
+  if (name.startsWith('part-')) return 20_000;
+  if (name === 'tail-09.b64') return 524;
+  return 4_000;
+}
+
 await mkdir(audioDir, { recursive: true });
 const base64Parts = [];
 for (const [index, path] of orderedParts.entries()) {
-  const expectedLength = index < 3 ? 20_000 : index < 12 ? 4_000 : 524;
+  const expectedLength = expectedLengthFor(path);
   const raw = await readFile(path, 'utf8');
   const compact = raw.replace(/\s+/g, '');
   if (compact.length < expectedLength) {
-    throw new Error(`Bloc musical ${index + 1} incomplet : ${compact.length} caractères au lieu d’au moins ${expectedLength}.`);
+    throw new Error(`${basename(path)} incomplet : ${compact.length} caractères au lieu d’au moins ${expectedLength}.`);
   }
 
   const part = compact.slice(0, expectedLength);
   if (!/^[A-Za-z0-9+/]+={0,2}$/.test(part)) {
-    throw new Error(`Bloc musical ${index + 1} contient des caractères non valides dans sa partie utile.`);
+    throw new Error(`${basename(path)} contient des caractères non valides dans sa partie utile.`);
   }
   if (compact.length > expectedLength) {
-    console.warn(`Bloc musical ${index + 1} : ${compact.length - expectedLength} caractère(s) superflu(s) ignoré(s).`);
+    console.warn(`${basename(path)} : ${compact.length - expectedLength} caractère(s) superflu(s) ignoré(s).`);
   }
+  console.log(`Bloc ${index + 1}/${orderedParts.length} : ${basename(path)}, ${part.length} caractères utiles.`);
   base64Parts.push(part);
 }
 
