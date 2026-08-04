@@ -1,22 +1,22 @@
 import { Capacitor } from '@capacitor/core';
 import { NativeAudio } from '@capacitor-community/native-audio';
-import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 const ASSETS = {
-  music: { file: 'music-loop.ogg', volume: 0.34, channels: 1 },
-  pop: { file: 'pop.ogg', volume: 0.78, channels: 5 },
-  bad: { file: 'bad.ogg', volume: 0.70, channels: 2 },
-  bomb: { file: 'bomb.ogg', volume: 0.92, channels: 3 },
-  laser: { file: 'laser.ogg', volume: 0.82, channels: 3 },
-  rainbow: { file: 'rainbow.ogg', volume: 0.90, channels: 3 },
-  victory: { file: 'victory.ogg', volume: 0.90, channels: 1 },
-  failure: { file: 'failure.ogg', volume: 0.80, channels: 1 },
+  music: { file: 'music-loop.mp3', volume: 0.62, channels: 1 },
+  pop: { file: 'pop.ogg', volume: 0.82, channels: 5 },
+  bad: { file: 'bad.ogg', volume: 0.74, channels: 2 },
+  bomb: { file: 'bomb.ogg', volume: 0.94, channels: 3 },
+  laser: { file: 'laser.ogg', volume: 0.86, channels: 3 },
+  rainbow: { file: 'rainbow.ogg', volume: 0.94, channels: 3 },
+  victory: { file: 'victory.ogg', volume: 0.94, channels: 1 },
+  failure: { file: 'failure.ogg', volume: 0.84, channels: 1 },
   combo: { file: 'combo.ogg', volume: 1.0, channels: 2 },
   super: { file: 'super.ogg', volume: 1.0, channels: 2 },
   mega: { file: 'mega.ogg', volume: 1.0, channels: 2 },
   legendary: { file: 'legendary.ogg', volume: 1.0, channels: 2 },
   hurry: { file: 'hurry.ogg', volume: 1.0, channels: 1 },
-  unlock: { file: 'unlock.ogg', volume: 0.05, channels: 1 },
+  unlock: { file: 'unlock.ogg', volume: 0.08, channels: 1 },
 };
 
 const isNative = Capacitor.isNativePlatform();
@@ -29,27 +29,37 @@ let announcerEnabled = true;
 let vibrationEnabled = true;
 let musicPlaying = false;
 
-function assetPath(file) {
-  return isNative ? `public/audio/${file}` : `audio/${file}`;
+function nativePaths(file) {
+  return [`audio/${file}`, `public/audio/${file}`, file];
+}
+
+function webPath(file) {
+  return `audio/${file}`;
 }
 
 async function preloadNative(id, config) {
-  try {
-    await NativeAudio.preload({
-      assetId: id,
-      assetPath: assetPath(config.file),
-      volume: config.volume,
-      audioChannelNum: config.channels,
-      isUrl: false,
-    });
-    loaded.add(id);
-  } catch (error) {
-    console.warn(`Audio natif non chargé: ${id}`, error);
+  let lastError = null;
+  for (const path of nativePaths(config.file)) {
+    try {
+      await NativeAudio.preload({
+        assetId: id,
+        assetPath: path,
+        volume: config.volume,
+        audioChannelNum: config.channels,
+        isUrl: false,
+      });
+      loaded.add(id);
+      return;
+    } catch (error) {
+      lastError = error;
+      try { await NativeAudio.unload({ assetId: id }); } catch (_) {}
+    }
   }
+  console.warn(`Audio natif non chargé: ${id}`, lastError);
 }
 
 function preloadWeb(id, config) {
-  const audio = new Audio(assetPath(config.file));
+  const audio = new Audio(webPath(config.file));
   audio.preload = 'auto';
   audio.volume = config.volume;
   audio.playsInline = true;
@@ -66,7 +76,9 @@ async function init() {
       } catch (error) {
         console.warn('Configuration audio native indisponible.', error);
       }
-      await Promise.all(Object.entries(ASSETS).map(([id, config]) => preloadNative(id, config)));
+      for (const [id, config] of Object.entries(ASSETS)) {
+        await preloadNative(id, config);
+      }
     } else {
       Object.entries(ASSETS).forEach(([id, config]) => preloadWeb(id, config));
     }
@@ -117,10 +129,11 @@ async function stop(id) {
 }
 
 async function startMusic() {
-  if (!musicEnabled || musicPlaying) return;
+  if (!musicEnabled || musicPlaying) return false;
   musicPlaying = true;
   const ok = await play('music', { loop: true });
   if (!ok) musicPlaying = false;
+  return ok;
 }
 
 async function stopMusic() {
@@ -130,8 +143,9 @@ async function stopMusic() {
 
 async function setMusic(enabled) {
   musicEnabled = Boolean(enabled);
-  if (musicEnabled) await startMusic();
-  else await stopMusic();
+  if (musicEnabled) return startMusic();
+  await stopMusic();
+  return true;
 }
 
 function setSfx(enabled) { sfxEnabled = Boolean(enabled); }
@@ -148,30 +162,49 @@ async function announce(id) {
   return play(id);
 }
 
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function vibrateDuration(duration) {
+  if (!vibrationEnabled) return false;
+  let worked = false;
+  try {
+    await Haptics.vibrate({ duration });
+    worked = true;
+  } catch (_) {}
+  try {
+    if (navigator.vibrate) {
+      navigator.vibrate(duration);
+      worked = true;
+    }
+  } catch (_) {}
+  return worked;
+}
+
 async function impact(level = 'medium') {
   if (!vibrationEnabled) return;
+  const duration = level === 'heavy' ? 145 : level === 'light' ? 45 : 85;
+  await vibrateDuration(duration);
   try {
     const style = level === 'heavy' ? ImpactStyle.Heavy : level === 'light' ? ImpactStyle.Light : ImpactStyle.Medium;
     await Haptics.impact({ style });
-  } catch (error) {
-    if (navigator.vibrate) navigator.vibrate(level === 'heavy' ? 110 : level === 'light' ? 35 : 65);
-  }
+  } catch (_) {}
 }
 
 async function notify(type = 'success') {
   if (!vibrationEnabled) return;
-  try {
-    const nativeType = type === 'error' ? NotificationType.Error : type === 'warning' ? NotificationType.Warning : NotificationType.Success;
-    await Haptics.notification({ type: nativeType });
-  } catch (error) {
-    if (navigator.vibrate) navigator.vibrate(type === 'error' ? [90, 50, 120] : [45, 35, 70]);
+  const pattern = type === 'error' ? [110, 70, 160] : type === 'warning' ? [70, 55, 110] : [45, 45, 90];
+  for (let index = 0; index < pattern.length; index++) {
+    await vibrateDuration(pattern[index]);
+    if (index < pattern.length - 1) await wait(55);
   }
 }
 
 async function testAll() {
   const count = await init();
   await effect('pop');
-  await impact('medium');
+  await notify('success');
   return count;
 }
 
