@@ -18,11 +18,13 @@ if (!partNames.length) throw new Error('Aucun morceau de la musique fournie n’
 
 const base64Parts = [];
 for (const name of partNames) {
-  base64Parts.push((await readFile(resolve(partsDir, name), 'utf8')).trim());
+  const part = (await readFile(resolve(partsDir, name), 'utf8')).trim();
+  if (!/^[A-Za-z0-9+/=]+$/.test(part)) throw new Error(`Partie musicale invalide : ${name}`);
+  base64Parts.push(part);
 }
 
 const source = Buffer.from(base64Parts.join(''), 'base64');
-if (source.length < 100_000 || source.subarray(0, 4).toString('ascii') !== 'OggS') {
+if (source.length < 30_000 || source.subarray(0, 4).toString('ascii') !== 'OggS') {
   throw new Error(`Musique reconstruite invalide (${source.length} octets).`);
 }
 await writeFile(sourcePath, source);
@@ -45,4 +47,4 @@ await writeFile(
   'utf8',
 );
 
-console.log(`Musique fournie reconstruite depuis ${partNames.length} parties : ${source.length} octets.`);
+console.log(`Musique fournie reconstruite depuis ${partNames.length} partie(s) : ${source.length} octets.`);
