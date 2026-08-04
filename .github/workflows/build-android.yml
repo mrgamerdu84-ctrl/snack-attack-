@@ -46,11 +46,12 @@ jobs:
       - name: Preparer le jeu et la musique fournie
         run: npm run prepare:web
 
-      - name: Verifier musique mode detente et effets vitre
+      - name: Verifier musique mode detente et declencheur exact
         run: |
           test -s www/audio/music-loop.mp3
           test -s www/audio/music-loop.ogg
           test -s www/audio/MUSIC_SOURCE.txt
+          test "$(stat -c%s www/audio/music-loop.mp3)" -gt 400000
           test -s www/audio/pop.ogg
           test -s www/audio/bomb.ogg
           test -s www/audio/rainbow.ogg
@@ -66,14 +67,21 @@ jobs:
           node --check audio-fix.js
           node --check theme-effects.js
           node --check relax-mode.js
+          node --check v2-system.js
           DURATION=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 www/audio/music-loop.mp3)
           echo "Duree de la musique fournie: $DURATION secondes"
-          awk -v duration="$DURATION" 'BEGIN { exit !(duration >= 30 && duration <= 32) }'
-          grep -q "createParticlesWithExactGlassSplash" theme-effects.js
-          grep -q "splashFromBoard" theme-effects.js
+          awk -v duration="$DURATION" 'BEGIN { exit !(duration >= 30 && duration <= 32.5) }'
+          grep -q "const snackRect = element.getBoundingClientRect()" v2-system.js
+          grep -q "SnackThemeEffects.splashSnackAtViewport(fruit, clientX, clientY, particleCount)" v2-system.js
+          grep -q "sorted.forEach" v2-system.js
+          if grep -q "createParticlesWithExactGlassSplash" theme-effects.js; then
+            echo "Ancien double déclencheur encore présent" >&2
+            exit 1
+          fi
           grep -q "MODE DÉTENTE" relax-mode.js
           grep -q "Sans niveau, sans chrono" relax-mode.js
-          echo "Fichiers audio presents :"
+          echo "Déclencheur exact trouvé dans la boucle de suppression."
+          echo "Fichiers audio présents :"
           find www/audio -maxdepth 1 -type f -printf '%f %s octets\n' | sort
 
       - name: Creer le projet Android
@@ -101,6 +109,7 @@ jobs:
           test -s android/app/src/main/assets/public/theme-effects.css
           test -s android/app/src/main/assets/public/relax-mode.js
           test -s android/app/src/main/assets/public/relax-mode.css
+          grep -q "SnackThemeEffects.splashSnackAtViewport" android/app/src/main/assets/public/v2-system.js
 
       - name: Compiler l APK installable
         working-directory: android
@@ -111,6 +120,7 @@ jobs:
       - name: Verifier le contenu final de l APK
         run: |
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/audio/music-loop.mp3"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/v2-system.js"
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/theme-effects.js"
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/theme-effects.css"
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/relax-mode.js"
@@ -138,4 +148,4 @@ jobs:
           gh release create autonome-latest Snack-Attack-Autonomous.apk \
             --target "$GITHUB_SHA" \
             --title "Snack Attack autonome" \
-            --notes "Snack Attack avec la musique fournie en boucle, le mode Detente infini et les projections exactes sur la vitre selon chaque snack. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
+            --notes "Snack Attack avec la musique fournie en boucle, le mode Detente infini et les projections exactes sur la vitre déclenchées depuis chaque snack cassé. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
