@@ -46,8 +46,9 @@ jobs:
       - name: Preparer le jeu et les fichiers audio hors ligne
         run: npm run prepare:web
 
-      - name: Verifier les sons embarques
+      - name: Verifier la musique et les effets de themes
         run: |
+          test -s www/audio/music-loop.mp3
           test -s www/audio/music-loop.ogg
           test -s www/audio/pop.ogg
           test -s www/audio/bomb.ogg
@@ -57,6 +58,10 @@ jobs:
           test -s www/audio/mega.ogg
           test -s www/audio/legendary.ogg
           test -s www/native-feedback.js
+          test -s www/theme-effects.js
+          test -s www/theme-effects.css
+          node --check audio-fix.js
+          node --check theme-effects.js
           echo "Fichiers audio presents :"
           find www/audio -maxdepth 1 -type f -printf '%f %s octets\n' | sort
 
@@ -69,18 +74,32 @@ jobs:
       - name: Synchroniser le jeu et les plugins natifs
         run: npx cap sync android
 
-      - name: Verifier les plugins Android
+      - name: Copier les sons natifs et activer la vibration
+        run: npm run prepare:android-feedback
+
+      - name: Verifier les plugins et ressources Android
         run: |
           grep -R "NativeAudio" android/app/src/main/assets/capacitor.plugins.json
           grep -R "Haptics" android/app/src/main/assets/capacitor.plugins.json
-          test -s android/app/src/main/assets/public/audio/music-loop.ogg
-          test -s android/app/src/main/assets/public/audio/legendary.ogg
+          grep -R "android.permission.VIBRATE" android/app/src/main/AndroidManifest.xml
+          test -s android/app/src/main/assets/audio/music-loop.mp3
+          test -s android/app/src/main/assets/audio/pop.ogg
+          test -s android/app/src/main/assets/audio/legendary.ogg
+          test -s android/app/src/main/assets/public/audio/music-loop.mp3
+          test -s android/app/src/main/assets/public/theme-effects.js
+          test -s android/app/src/main/assets/public/theme-effects.css
 
       - name: Compiler l APK installable
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Verifier le contenu final de l APK
+        run: |
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/audio/music-loop.mp3"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/theme-effects.js"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/theme-effects.css"
 
       - name: Renommer l APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk Snack-Attack-Autonomous.apk
@@ -104,4 +123,4 @@ jobs:
           gh release create autonome-latest Snack-Attack-Autonomous.apk \
             --target "$GITHUB_SHA" \
             --title "Snack Attack autonome" \
-            --notes "Snack Attack avec musique, annonces, effets sonores et vibrations Android natifs. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
+            --notes "Snack Attack avec musique MP3 relancee au toucher, vibration Android renforcee et explosions visuelles propres a chaque theme. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
