@@ -33,9 +33,12 @@ for (const file of files) {
 let manifest = await readFile(manifestPath, 'utf8');
 const permission = '<uses-permission android:name="android.permission.VIBRATE" />';
 if (!manifest.includes('android.permission.VIBRATE')) {
-  manifest = manifest.replace('<manifest', `<manifest`);
-  const endOfManifestTag = manifest.indexOf('>');
-  manifest = `${manifest.slice(0, endOfManifestTag + 1)}\n    ${permission}${manifest.slice(endOfManifestTag + 1)}`;
+  const manifestStart = manifest.indexOf('<manifest');
+  const manifestTagEnd = manifest.indexOf('>', manifestStart);
+  if (manifestStart < 0 || manifestTagEnd < 0) {
+    throw new Error('Balise <manifest> introuvable dans AndroidManifest.xml');
+  }
+  manifest = `${manifest.slice(0, manifestTagEnd + 1)}\n    ${permission}${manifest.slice(manifestTagEnd + 1)}`;
   await writeFile(manifestPath, manifest, 'utf8');
 }
 
