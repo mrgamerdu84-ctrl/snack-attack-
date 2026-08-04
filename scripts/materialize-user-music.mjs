@@ -18,12 +18,31 @@ if (!partNames.length) throw new Error('Aucun morceau de la musique fournie n’
 
 const base64Parts = [];
 for (const name of partNames) {
-  const part = (await readFile(resolve(partsDir, name), 'utf8')).trim();
-  if (!/^[A-Za-z0-9+/=]+$/.test(part)) throw new Error(`Partie musicale invalide : ${name}`);
+  let part = await readFile(resolve(partsDir, name), 'utf8');
+
+  // Accepte les morceaux avec BOM, retours à la ligne, espaces ou préfixe data URL.
+  part = part.replace(/^\uFEFF/, '').trim();
+  if (part.startsWith('data:')) {
+    const comma = part.indexOf(',');
+    if (comma < 0) throw new Error(`Préfixe data URL invalide : ${name}`);
+    part = part.slice(comma + 1);
+  }
+  if ((part.startsWith('"') && part.endsWith('"')) || (part.startsWith("'") && part.endsWith("'"))) {
+    part = part.slice(1, -1);
+  }
+  part = part.replace(/\s+/g, '');
+
+  if (!part || !/^[A-Za-z0-9+/]*={0,2}$/.test(part)) {
+    const invalid = [...new Set(part.replace(/[A-Za-z0-9+/=]/g, ''))]
+      .map((character) => JSON.stringify(character))
+      .join(', ');
+    throw new Error(`Partie musicale invalide : ${name}${invalid ? ` — caractères : ${invalid}` : ''}`);
+  }
   base64Parts.push(part);
 }
 
-const source = Buffer.from(base64Parts.join(''), 'base64');
+const encoded = base64Parts.join('');
+const source = Buffer.from(encoded, 'base64');
 if (source.length < 30_000 || source.subarray(0, 4).toString('ascii') !== 'OggS') {
   throw new Error(`Musique reconstruite invalide (${source.length} octets).`);
 }
