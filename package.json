@@ -1,15 +1,16 @@
 {
   "name": "snack-attack-ultimate",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
-  "description": "Snack Attack V2 - application Android autonome avec audio et vibrations natifs",
+  "description": "Snack Attack V2 - effets visuels par thème, musique Android et vibrations renforcées",
   "scripts": {
     "prepare:branding": "node scripts/materialize-branding.mjs",
-    "prepare:audio": "bash scripts/prepare-voice-assets.sh && python3 scripts/generate_audio.py",
+    "prepare:audio": "bash scripts/prepare-voice-assets.sh && python3 scripts/generate_audio.py && bash scripts/ensure-music-mp3.sh",
     "prepare:web": "npm run prepare:branding && npm run prepare:audio && node scripts/prepare-web.mjs",
+    "prepare:android-feedback": "node scripts/prepare-android-feedback.mjs",
     "android:assets": "npm run prepare:branding && npx @capacitor/assets generate --android --assetPath resources --iconBackgroundColor '#51107f' --iconBackgroundColorDark '#2b0752' --splashBackgroundColor '#51107f' --splashBackgroundColorDark '#2b0752'",
-    "android:init": "npm run prepare:web && npx cap add android && npm run android:assets",
-    "android:sync": "npm run prepare:web && npx cap sync android"
+    "android:init": "npm run prepare:web && npx cap add android && npm run prepare:android-feedback && npm run android:assets",
+    "android:sync": "npm run prepare:web && npx cap sync android && npm run prepare:android-feedback"
   },
   "dependencies": {
     "@capacitor/android": "8.4.0",
