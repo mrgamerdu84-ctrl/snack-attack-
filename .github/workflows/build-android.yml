@@ -43,7 +43,7 @@ jobs:
       - name: Installer Capacitor et les plugins natifs
         run: npm install --no-audit --no-fund
 
-      - name: Preparer le jeu et les fichiers audio hors ligne
+      - name: Preparer le jeu et la musique fournie
         run: npm run prepare:web
 
       - name: Verifier mode detente et projections exactes
@@ -57,10 +57,16 @@ jobs:
           grep -F "getBoundingClientRect" www/v2-system.js
           grep -F "id=\"relaxBtn\"" www/index.html
 
-      - name: Verifier la musique et les effets de themes
+      - name: Verifier la musique fournie et les effets
         run: |
           test -s www/audio/music-loop.mp3
           test -s www/audio/music-loop.ogg
+          test -s www/audio/MUSIC_SOURCE.txt
+          test "$(stat -c%s www/audio/music-loop.mp3)" -gt 400000
+          DURATION=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 www/audio/music-loop.mp3)
+          echo "Durée de la musique fournie : $DURATION secondes"
+          awk -v duration="$DURATION" 'BEGIN { exit !(duration >= 30 && duration <= 32.5) }'
+          grep -F "three_tiles_left.mp3" www/audio/MUSIC_SOURCE.txt
           test -s www/audio/pop.ogg
           test -s www/audio/bomb.ogg
           test -s www/audio/rainbow.ogg
@@ -73,7 +79,7 @@ jobs:
           test -s www/theme-effects.css
           node --check audio-fix.js
           node --check theme-effects.js
-          echo "Fichiers audio presents :"
+          echo "Fichiers audio présents :"
           find www/audio -maxdepth 1 -type f -printf '%f %s octets\n' | sort
 
       - name: Creer le projet Android
@@ -97,6 +103,7 @@ jobs:
           test -s android/app/src/main/assets/audio/pop.ogg
           test -s android/app/src/main/assets/audio/legendary.ogg
           test -s android/app/src/main/assets/public/audio/music-loop.mp3
+          test -s android/app/src/main/assets/public/audio/MUSIC_SOURCE.txt
           test -s android/app/src/main/assets/public/theme-effects.js
           test -s android/app/src/main/assets/public/theme-effects.css
           test -s android/app/src/main/assets/public/screen-splashes.js
@@ -113,6 +120,8 @@ jobs:
       - name: Verifier le contenu final de l APK
         run: |
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/audio/music-loop.mp3"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/audio/music-loop.mp3"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/audio/MUSIC_SOURCE.txt"
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/screen-splashes.js"
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/screen-splashes.css"
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/v2-system.js"
@@ -139,4 +148,4 @@ jobs:
           gh release create autonome-latest Snack-Attack-Autonomous.apk \
             --target "$GITHUB_SHA" \
             --title "Snack Attack autonome" \
-            --notes "Snack Attack avec aventure, mode detente infini et projections plein ecran declenchees depuis chaque snack detruit. Compilation GitHub Actions numero $GITHUB_RUN_NUMBER."
+            --notes "Snack Attack avec aventure, mode détente infini, projections plein écran et la musique three_tiles_left fournie en boucle. Compilation GitHub Actions numéro $GITHUB_RUN_NUMBER."
