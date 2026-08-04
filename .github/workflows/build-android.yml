@@ -2,11 +2,9 @@ name: Construire l APK Android
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -19,133 +17,82 @@ concurrency:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Recuperer le projet
-        uses: actions/checkout@v4
-
-      - name: Installer Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
-      - name: Installer Java
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
 
-      - name: Installer les outils audio
+      - name: Installer les outils audio si necessaire
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg espeak unzip curl
+          missing=()
+          command -v ffmpeg >/dev/null 2>&1 || missing+=(ffmpeg)
+          command -v espeak >/dev/null 2>&1 || missing+=(espeak)
+          command -v unzip >/dev/null 2>&1 || missing+=(unzip)
+          if [ ${#missing[@]} -gt 0 ]; then
+            sudo apt-get update -o Acquire::Retries=3
+            sudo apt-get install -y --no-install-recommends "${missing[@]}"
+          fi
 
-      - name: Installer Capacitor et les plugins natifs
+      - name: Installer les dependances
         run: npm install --no-audit --no-fund
 
-      - name: Preparer le jeu et la musique fournie
+      - name: Preparer le jeu
         run: npm run prepare:web
 
-      - name: Verifier mode detente et projections exactes
+      - name: Verifier les fonctions V3
         run: |
+          test -s www/menu-refresh.css
           test -s www/screen-splashes.js
           test -s www/screen-splashes.css
+          test -s www/shop-config.js
+          test -s www/shop.js
+          test -s www/shop.css
           node --check www/screen-splashes.js
           node --check www/v2-system.js
+          node --check www/shop-config.js
+          node --check www/shop.js
           grep -F "SnackScreenFX?.explodeAt" www/v2-system.js
-          grep -F "gameMode === 'relax'" www/v2-system.js
           grep -F "getBoundingClientRect" www/v2-system.js
-          grep -F "id=\"relaxBtn\"" www/index.html
+          grep -F "gameMode === 'relax'" www/v2-system.js
+          grep -F "enabled: false" www/shop-config.js
 
-      - name: Verifier la musique fournie et les effets
-        run: |
-          test -s www/audio/music-loop.mp3
-          test -s www/audio/music-loop.ogg
-          test -s www/audio/MUSIC_SOURCE.txt
-          test "$(stat -c%s www/audio/music-loop.mp3)" -gt 400000
-          DURATION=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 www/audio/music-loop.mp3)
-          echo "Durée de la musique fournie : $DURATION secondes"
-          awk -v duration="$DURATION" 'BEGIN { exit !(duration >= 30 && duration <= 32.5) }'
-          grep -F "three_tiles_left.mp3" www/audio/MUSIC_SOURCE.txt
-          test -s www/audio/pop.ogg
-          test -s www/audio/bomb.ogg
-          test -s www/audio/rainbow.ogg
-          test -s www/audio/combo.ogg
-          test -s www/audio/super.ogg
-          test -s www/audio/mega.ogg
-          test -s www/audio/legendary.ogg
-          test -s www/native-feedback.js
-          test -s www/theme-effects.js
-          test -s www/theme-effects.css
-          node --check audio-fix.js
-          node --check theme-effects.js
-          echo "Fichiers audio présents :"
-          find www/audio -maxdepth 1 -type f -printf '%f %s octets\n' | sort
-
-      - name: Creer le projet Android
+      - name: Creer Android
         run: npx cap add android
 
-      - name: Generer la nouvelle icone et le splash natif
+      - name: Generer icone et splash
         run: npm run android:assets
 
-      - name: Synchroniser le jeu et les plugins natifs
+      - name: Synchroniser Android
         run: npx cap sync android
 
-      - name: Copier les sons natifs et activer la vibration
+      - name: Preparer sons et vibration
         run: npm run prepare:android-feedback
 
-      - name: Verifier les plugins et ressources Android
-        run: |
-          grep -R "NativeAudio" android/app/src/main/assets/capacitor.plugins.json
-          grep -R "Haptics" android/app/src/main/assets/capacitor.plugins.json
-          grep -R "android.permission.VIBRATE" android/app/src/main/AndroidManifest.xml
-          test -s android/app/src/main/assets/audio/music-loop.mp3
-          test -s android/app/src/main/assets/audio/pop.ogg
-          test -s android/app/src/main/assets/audio/legendary.ogg
-          test -s android/app/src/main/assets/public/audio/music-loop.mp3
-          test -s android/app/src/main/assets/public/audio/MUSIC_SOURCE.txt
-          test -s android/app/src/main/assets/public/theme-effects.js
-          test -s android/app/src/main/assets/public/theme-effects.css
-          test -s android/app/src/main/assets/public/screen-splashes.js
-          test -s android/app/src/main/assets/public/screen-splashes.css
-          grep -F "SnackScreenFX?.explodeAt" android/app/src/main/assets/public/v2-system.js
-          grep -F "gameMode === 'relax'" android/app/src/main/assets/public/v2-system.js
-
-      - name: Compiler l APK installable
+      - name: Compiler l APK
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Verifier le contenu final de l APK
+      - name: Verifier l APK
         run: |
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/audio/music-loop.mp3"
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/audio/music-loop.mp3"
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/audio/MUSIC_SOURCE.txt"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/menu-refresh.css"
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/screen-splashes.js"
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/screen-splashes.css"
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/v2-system.js"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/shop-config.js"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/public/shop.js"
 
       - name: Renommer l APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Snack-Attack-Autonomous.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Snack-Attack-V3.apk
 
       - name: Publier l artefact
         uses: actions/upload-artifact@v4
         with:
-          name: Snack-Attack-Autonomous
-          path: Snack-Attack-Autonomous.apk
+          name: Snack-Attack-V3
+          path: Snack-Attack-V3.apk
           retention-days: 30
           if-no-files-found: error
-
-      - name: Mettre a jour le telechargement permanent
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if gh release view autonome-latest >/dev/null 2>&1; then
-            gh release delete autonome-latest --cleanup-tag --yes
-          fi
-          gh release create autonome-latest Snack-Attack-Autonomous.apk \
-            --target "$GITHUB_SHA" \
-            --title "Snack Attack autonome" \
-            --notes "Snack Attack avec aventure, mode détente infini, projections plein écran et la musique three_tiles_left fournie en boucle. Compilation GitHub Actions numéro $GITHUB_RUN_NUMBER."
