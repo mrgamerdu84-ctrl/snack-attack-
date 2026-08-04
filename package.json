@@ -1,11 +1,11 @@
 {
   "name": "snack-attack-ultimate",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "private": true,
-  "description": "Snack Attack - aventure, mode détente, nouveau menu, effets de lame et boutique cachée",
+  "description": "Snack Attack - aventure, mode détente, projections de nourriture, fissures de combos, musique fournie et boutique cachée",
   "scripts": {
     "prepare:branding": "node scripts/materialize-branding.mjs",
-    "prepare:audio": "bash scripts/prepare-voice-assets.sh && python3 scripts/generate_audio.py",
+    "prepare:audio": "bash scripts/prepare-voice-assets.sh && python3 scripts/generate_audio.py && node scripts/materialize-user-music.mjs",
     "prepare:web": "npm run prepare:branding && npm run prepare:audio && node scripts/prepare-web.mjs && node scripts/patch-v2-relax.mjs",
     "prepare:android-feedback": "node scripts/prepare-android-feedback.mjs",
     "android:assets": "npm run prepare:branding && npx @capacitor/assets generate --android --assetPath resources --iconBackgroundColor '#51107f' --iconBackgroundColorDark '#2b0752' --splashBackgroundColor '#51107f' --splashBackgroundColorDark '#2b0752'",
