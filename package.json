@@ -6,7 +6,7 @@
   "scripts": {
     "prepare:branding": "node scripts/materialize-branding.mjs",
     "prepare:audio": "bash scripts/prepare-voice-assets.sh && python3 scripts/generate_audio.py && node scripts/materialize-user-music.mjs",
-    "prepare:web": "npm run prepare:branding && npm run prepare:audio && node scripts/prepare-web.mjs",
+    "prepare:web": "npm run prepare:branding && npm run prepare:audio && node scripts/apply-exact-splash-hook.mjs && node scripts/prepare-web.mjs",
     "prepare:android-feedback": "node scripts/prepare-android-feedback.mjs",
     "android:assets": "npm run prepare:branding && npx @capacitor/assets generate --android --assetPath resources --iconBackgroundColor '#51107f' --iconBackgroundColorDark '#2b0752' --splashBackgroundColor '#51107f' --splashBackgroundColorDark '#2b0752'",
     "android:init": "npm run prepare:web && npx cap add android && npm run prepare:android-feedback && npm run android:assets",
