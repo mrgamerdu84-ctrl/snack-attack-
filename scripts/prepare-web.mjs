@@ -13,6 +13,8 @@ const requiredFiles = [
   'branding.css',
   'v2.css',
   'theme-effects.css',
+  'glass-effects.css',
+  'relax-mode.css',
   'branding.js',
   'game-core.js',
   'game-effects.js',
@@ -21,7 +23,9 @@ const requiredFiles = [
   'voice-controls.js',
   'v2-system.js',
   'audio-fix.js',
-  'theme-effects.js'
+  'theme-effects.js',
+  'glass-effects.js',
+  'relax-mode.js'
 ];
 
 const optionalDirectories = ['assets', 'images', 'audio'];
@@ -67,4 +71,4 @@ await build({
   sourcemap: false
 });
 
-console.log('Snack Attack V2, musique MP3, vibrations renforcées et effets visuels par thème préparés dans www/.');
+console.log('Snack Attack avec mode détente, effets vitre exacts, musique et ressources Android préparés dans www/.');
