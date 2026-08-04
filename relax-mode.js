@@ -26,7 +26,7 @@
     state.selectedTheme = safeTheme;
     selectedTheme = safeTheme;
     FRUITS = THEMES[safeTheme];
-    document.body.className = `theme-${safeTheme}`;
+    document.body.className = `theme-${safeTheme} relax-active`;
     document.querySelectorAll('.t-card').forEach((card) => {
       card.classList.toggle('selected', card.dataset.theme === safeTheme);
     });
@@ -66,6 +66,7 @@
   }
 
   function restoreAdventureLabels() {
+    document.body.classList.remove('relax-active');
     const badge = document.querySelector('.mode-badge');
     const backButton = document.getElementById('backBtn');
     if (badge) badge.textContent = '🌟 V2 • BOOSTERS • COMBOS • AVENTURE';
@@ -97,7 +98,7 @@
     moves = 999999999;
     score = 0;
     target = Number.MAX_SAFE_INTEGER;
-    shuffle = 999;
+    shuffle = 999999;
     over = false;
     busy = false;
 
@@ -130,6 +131,8 @@
     if (!state.active) return original.win.apply(this, args);
     saveBest();
     over = false;
+    busy = false;
+    document.getElementById('ovWin')?.classList.remove('show');
     applyRelaxHud();
     return undefined;
   };
@@ -138,6 +141,9 @@
     if (!state.active) return original.lose.apply(this, args);
     saveBest();
     over = false;
+    busy = false;
+    moves = 999999999;
+    document.getElementById('ovLose')?.classList.remove('show');
     applyRelaxHud();
     return undefined;
   };
@@ -148,7 +154,7 @@
       setTimeout(() => {
         saveBest();
         ensurePlayableBoard();
-      }, 1500);
+      }, 2600);
     }
     return result;
   };
