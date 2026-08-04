@@ -22,7 +22,8 @@
 
   let settings = readSettings();
   let nativeMusicFallback = false;
-  const musicPlayer = new Audio('audio/music-loop.mp3');
+  let startingMusic = false;
+  const musicPlayer = new Audio('audio/music-loop.ogg');
   musicPlayer.loop = true;
   musicPlayer.preload = 'auto';
   musicPlayer.volume = 0.58;
@@ -32,37 +33,54 @@
   native.setAnnouncer(settings.announcer !== false);
   native.setVibration(settings.vibration !== false);
 
-  function stopMusicEverywhere() {
+  async function stopMusicEverywhere(reset = false) {
     musicPlayer.pause();
-    try { musicPlayer.currentTime = 0; } catch (_) {}
-    native.stopMusic();
+    if (reset) {
+      try { musicPlayer.currentTime = 0; } catch (_) {}
+    }
+    await native.stopMusic();
     nativeMusicFallback = false;
+    startingMusic = false;
   }
 
-  function playMusicFromGesture() {
+  async function playMusicFromGesture() {
     settings = readSettings();
-    if (settings.music === false) {
-      stopMusicEverywhere();
-      return;
+    if (settings.music === false || startingMusic) {
+      if (settings.music === false) await stopMusicEverywhere(true);
+      return false;
     }
 
+    startingMusic = true;
     musicPlayer.volume = 0.58;
     musicPlayer.loop = true;
-    const attempt = musicPlayer.play();
-    if (attempt?.then) {
-      attempt.then(() => {
-        native.stopMusic();
+
+    try {
+      await musicPlayer.play();
+      await native.stopMusic();
+      nativeMusicFallback = false;
+      startingMusic = false;
+      return true;
+    } catch (webError) {
+      console.warn('Lecture OGG WebView indisponible, démarrage audio natif.', webError);
+      try {
+        await native.init();
+        nativeMusicFallback = await native.startMusic() !== false;
+      } catch (nativeError) {
+        console.error('Musique native impossible.', nativeError);
         nativeMusicFallback = false;
-      }).catch(async (error) => {
-        console.warn('Lecteur MP3 WebView indisponible, secours audio natif.', error);
-        nativeMusicFallback = await native.setMusic(true) !== false;
-      });
+      }
+      startingMusic = false;
+      return nativeMusicFallback;
     }
   }
 
+  musicPlayer.addEventListener('ended', () => {
+    if (readSettings().music !== false) playMusicFromGesture();
+  });
   musicPlayer.addEventListener('error', async () => {
     if (readSettings().music !== false) {
-      nativeMusicFallback = await native.setMusic(true) !== false;
+      await native.init();
+      nativeMusicFallback = await native.startMusic() !== false;
     }
   });
 
@@ -81,7 +99,7 @@
       try { originalStopMusic?.(); } catch (_) {}
       settings = readSettings();
       if (enabled) playMusicFromGesture();
-      else stopMusicEverywhere();
+      else stopMusicEverywhere(true);
     };
     audioApi.setSfx = (enabled) => {
       try { originalSetSfx?.(enabled); } catch (_) {}
@@ -103,12 +121,12 @@
       native.impact(type === 'rainbow' || type === 'cross' ? 'heavy' : 'medium');
     };
     audioApi.victory = () => {
-      stopMusicEverywhere();
+      stopMusicEverywhere(true);
       native.effect('victory');
       native.notify('success');
     };
     audioApi.failure = () => {
-      stopMusicEverywhere();
+      stopMusicEverywhere(true);
       native.effect('failure');
       native.notify('error');
     };
@@ -174,10 +192,9 @@
       <button class="mainbtn" id="testHapticBtn" type="button">📳 Tester vibration</button>`;
     settingsCard.appendChild(panel);
 
-    document.getElementById('testMusicBtn').onclick = (event) => {
-      playMusicFromGesture();
-      markTest(event.currentTarget, '🎵 Musique lancée');
-      setTimeout(() => stopMusicEverywhere(), 4500);
+    document.getElementById('testMusicBtn').onclick = async (event) => {
+      const ok = await playMusicFromGesture();
+      markTest(event.currentTarget, ok ? '🎵 Musique lancée' : '⚠️ Musique bloquée');
     };
     document.getElementById('testVoiceBtn').onclick = (event) => {
       native.announce('legendary');
@@ -204,13 +221,23 @@
     console.info('Snack Attack audio natif prêt.', count);
   }
 
+  const launchMusic = async () => {
+    await native.init();
+    await playMusicFromGesture();
+  };
+
   document.addEventListener('pointerdown', () => native.init(), { once: true, capture: true });
-  document.getElementById('playBtn')?.addEventListener('click', () => playMusicFromGesture(), { capture: true });
+  document.getElementById('playBtn')?.addEventListener('click', launchMusic, { capture: true });
+  document.getElementById('relaxBtn')?.addEventListener('click', launchMusic, { capture: true });
   window.addEventListener('load', initialize, { once: true });
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stopMusicEverywhere();
+    if (document.hidden) stopMusicEverywhere(false);
     else if (document.getElementById('gameWrap')?.style.display !== 'none' && readSettings().music !== false) playMusicFromGesture();
   });
 
-  window.SnackMusicPlayer = { play: playMusicFromGesture, stop: stopMusicEverywhere, usingNativeFallback: () => nativeMusicFallback };
+  window.SnackMusicPlayer = {
+    play: playMusicFromGesture,
+    stop: () => stopMusicEverywhere(true),
+    usingNativeFallback: () => nativeMusicFallback,
+  };
 })();
