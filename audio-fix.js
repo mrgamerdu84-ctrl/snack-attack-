@@ -21,10 +21,50 @@
   };
 
   let settings = readSettings();
-  native.setMusic(false);
+  let nativeMusicFallback = false;
+  const musicPlayer = new Audio('audio/music-loop.mp3');
+  musicPlayer.loop = true;
+  musicPlayer.preload = 'auto';
+  musicPlayer.volume = 0.58;
+  musicPlayer.playsInline = true;
+
   native.setSfx(settings.sfx !== false);
   native.setAnnouncer(settings.announcer !== false);
   native.setVibration(settings.vibration !== false);
+
+  function stopMusicEverywhere() {
+    musicPlayer.pause();
+    try { musicPlayer.currentTime = 0; } catch (_) {}
+    native.stopMusic();
+    nativeMusicFallback = false;
+  }
+
+  function playMusicFromGesture() {
+    settings = readSettings();
+    if (settings.music === false) {
+      stopMusicEverywhere();
+      return;
+    }
+
+    musicPlayer.volume = 0.58;
+    musicPlayer.loop = true;
+    const attempt = musicPlayer.play();
+    if (attempt?.then) {
+      attempt.then(() => {
+        native.stopMusic();
+        nativeMusicFallback = false;
+      }).catch(async (error) => {
+        console.warn('Lecteur MP3 WebView indisponible, secours audio natif.', error);
+        nativeMusicFallback = await native.setMusic(true) !== false;
+      });
+    }
+  }
+
+  musicPlayer.addEventListener('error', async () => {
+    if (readSettings().music !== false) {
+      nativeMusicFallback = await native.setMusic(true) !== false;
+    }
+  });
 
   const audioApi = window.SnackAudio;
   if (audioApi) {
@@ -34,16 +74,14 @@
 
     try { originalStopMusic?.(); } catch (_) {}
 
-    audioApi.startMusic = () => {
-      settings = readSettings();
-      native.setMusic(settings.music !== false);
-    };
-    audioApi.stopMusic = () => native.stopMusic();
+    audioApi.startMusic = () => playMusicFromGesture();
+    audioApi.stopMusic = () => stopMusicEverywhere();
     audioApi.setMusic = (enabled) => {
       try { originalSetMusic?.(enabled); } catch (_) {}
       try { originalStopMusic?.(); } catch (_) {}
       settings = readSettings();
-      native.setMusic(Boolean(enabled));
+      if (enabled) playMusicFromGesture();
+      else stopMusicEverywhere();
     };
     audioApi.setSfx = (enabled) => {
       try { originalSetSfx?.(enabled); } catch (_) {}
@@ -65,12 +103,12 @@
       native.impact(type === 'rainbow' || type === 'cross' ? 'heavy' : 'medium');
     };
     audioApi.victory = () => {
-      native.stopMusic();
+      stopMusicEverywhere();
       native.effect('victory');
       native.notify('success');
     };
     audioApi.failure = () => {
-      native.stopMusic();
+      stopMusicEverywhere();
       native.effect('failure');
       native.notify('error');
     };
@@ -116,6 +154,13 @@
     };
   }
 
+  function markTest(button, successText) {
+    if (!button) return;
+    const original = button.textContent;
+    button.textContent = successText;
+    setTimeout(() => { button.textContent = original; }, 1400);
+  }
+
   function addTestButtons() {
     const settingsCard = document.querySelector('#v2Settings .v2-modal-card');
     if (!settingsCard || document.getElementById('nativeSoundTests')) return;
@@ -129,13 +174,24 @@
       <button class="mainbtn" id="testHapticBtn" type="button">📳 Tester vibration</button>`;
     settingsCard.appendChild(panel);
 
-    document.getElementById('testMusicBtn').onclick = async () => {
-      await native.setMusic(true);
-      setTimeout(() => native.stopMusic(), 3500);
+    document.getElementById('testMusicBtn').onclick = (event) => {
+      playMusicFromGesture();
+      markTest(event.currentTarget, '🎵 Musique lancée');
+      setTimeout(() => stopMusicEverywhere(), 4500);
     };
-    document.getElementById('testVoiceBtn').onclick = () => native.announce('legendary');
-    document.getElementById('testSfxBtn').onclick = () => native.effect('rainbow');
-    document.getElementById('testHapticBtn').onclick = () => native.notify('success');
+    document.getElementById('testVoiceBtn').onclick = (event) => {
+      native.announce('legendary');
+      markTest(event.currentTarget, '📣 Annonce jouée');
+    };
+    document.getElementById('testSfxBtn').onclick = (event) => {
+      native.effect('rainbow');
+      window.SnackThemeEffects?.screenBurst?.(9);
+      markTest(event.currentTarget, '💥 Effet joué');
+    };
+    document.getElementById('testHapticBtn').onclick = (event) => {
+      native.notify('success');
+      markTest(event.currentTarget, '📳 Vibration envoyée');
+    };
   }
 
   async function initialize() {
@@ -149,9 +205,12 @@
   }
 
   document.addEventListener('pointerdown', () => native.init(), { once: true, capture: true });
+  document.getElementById('playBtn')?.addEventListener('click', () => playMusicFromGesture(), { capture: true });
   window.addEventListener('load', initialize, { once: true });
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) native.stopMusic();
-    else if (document.getElementById('gameWrap')?.style.display !== 'none' && readSettings().music !== false) native.setMusic(true);
+    if (document.hidden) stopMusicEverywhere();
+    else if (document.getElementById('gameWrap')?.style.display !== 'none' && readSettings().music !== false) playMusicFromGesture();
   });
+
+  window.SnackMusicPlayer = { play: playMusicFromGesture, stop: stopMusicEverywhere, usingNativeFallback: () => nativeMusicFallback };
 })();
