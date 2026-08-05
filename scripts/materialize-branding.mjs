@@ -41,14 +41,14 @@ async function rebuild(prefix, destination, chunkSize = null) {
 }
 
 const iconSource = resolve(resourcesDir, 'icon-source.avif');
-const splashSource = resolve(resourcesDir, 'splash-source.webp');
+const splashSource = resolve(resourcesDir, 'splash-source.avif');
 const iconWebp = resolve(resourcesDir, 'icon.webp');
 const iconPng = resolve(resourcesDir, 'icon.png');
 const splashWebp = resolve(assetsDir, 'snack-attack-splash.webp');
 const splashPng = resolve(resourcesDir, 'splash.png');
 
 await rebuild('icon-v4-avif-', iconSource, 8000);
-await rebuild('splash-v4-webp', splashSource);
+await rebuild('splash-v4-fixed-avif-', splashSource);
 
 await sharp(iconSource)
   .resize(1024, 1024, { fit: 'cover', position: 'centre' })
