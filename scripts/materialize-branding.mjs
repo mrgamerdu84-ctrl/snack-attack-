@@ -23,11 +23,7 @@ async function rebuild(prefix, destination, chunkSize = null) {
   for (let index = 0; index < files.length; index += 1) {
     const file = files[index];
     let part = (await readFile(resolve(sourceDir, file), 'utf8')).trim();
-
-    // Tous les morceaux sauf le dernier ont une taille fixe. Cette protection
-    // retire tout texte parasite ajouté après le contenu Base64 attendu.
     if (chunkSize && index < files.length - 1 && part.length > chunkSize) {
-      console.warn(`${file}: ${part.length - chunkSize} caractères parasites retirés.`);
       part = part.slice(0, chunkSize);
     }
     encoded += part;
@@ -41,18 +37,18 @@ async function rebuild(prefix, destination, chunkSize = null) {
 
   const metadata = await sharp(destination).metadata();
   if (!metadata.width || !metadata.height) throw new Error(`Image invalide pour ${prefix}`);
-  console.log(`${prefix}: ${files.length} morceaux, ${binary.length} octets, ${metadata.width}x${metadata.height}.`);
+  console.log(`${prefix}: ${files.length} morceau(x), ${binary.length} octets, ${metadata.width}x${metadata.height}.`);
 }
 
 const iconSource = resolve(resourcesDir, 'icon-source.avif');
-const splashSource = resolve(resourcesDir, 'splash-source.avif');
+const splashSource = resolve(resourcesDir, 'splash-source.webp');
 const iconWebp = resolve(resourcesDir, 'icon.webp');
 const iconPng = resolve(resourcesDir, 'icon.png');
 const splashWebp = resolve(assetsDir, 'snack-attack-splash.webp');
 const splashPng = resolve(resourcesDir, 'splash.png');
 
 await rebuild('icon-v4-avif-', iconSource, 8000);
-await rebuild('splash-v4-fixed-avif-', splashSource, 9000);
+await rebuild('splash-v4-webp', splashSource);
 
 await sharp(iconSource)
   .resize(1024, 1024, { fit: 'cover', position: 'centre' })
@@ -64,13 +60,11 @@ await sharp(iconSource)
   .png({ compressionLevel: 9 })
   .toFile(iconPng);
 
-// Le splash reste vertical afin de ne pas couper Chargement, 87 % et le copyright.
 await sharp(splashSource)
-  .resize({ width: 960, withoutEnlargement: false })
+  .resize(1024, 1536, { fit: 'cover', position: 'centre' })
   .webp({ quality: 90 })
   .toFile(splashWebp);
 
-// Capacitor demande une source carrée : l’image complète est centrée sur un fond assorti.
 await sharp(splashSource)
   .resize(2732, 2732, { fit: 'contain', position: 'centre', background: '#16052f' })
   .png({ compressionLevel: 9 })
