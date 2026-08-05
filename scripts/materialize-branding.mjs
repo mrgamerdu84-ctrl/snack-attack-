@@ -12,7 +12,7 @@ const assetsDir = resolve(rootDir, 'assets');
 await mkdir(resourcesDir, { recursive: true });
 await mkdir(assetsDir, { recursive: true });
 
-async function rebuild(prefix, destination) {
+async function rebuild(prefix, destination, chunkSize = null) {
   const files = (await readdir(sourceDir))
     .filter((name) => name.startsWith(prefix) && name.endsWith('.txt'))
     .sort();
@@ -20,7 +20,18 @@ async function rebuild(prefix, destination) {
   if (files.length === 0) throw new Error(`Aucun morceau trouvé pour ${prefix}`);
 
   let encoded = '';
-  for (const file of files) encoded += (await readFile(resolve(sourceDir, file), 'utf8')).trim();
+  for (let index = 0; index < files.length; index += 1) {
+    const file = files[index];
+    let part = (await readFile(resolve(sourceDir, file), 'utf8')).trim();
+
+    // Tous les morceaux sauf le dernier ont une taille fixe. Cette protection
+    // retire tout texte parasite ajouté après le contenu Base64 attendu.
+    if (chunkSize && index < files.length - 1 && part.length > chunkSize) {
+      console.warn(`${file}: ${part.length - chunkSize} caractères parasites retirés.`);
+      part = part.slice(0, chunkSize);
+    }
+    encoded += part;
+  }
 
   const binary = Buffer.from(encoded, 'base64');
   if (binary.length < 1024) throw new Error(`Image reconstruite trop petite pour ${prefix}`);
@@ -40,8 +51,8 @@ const iconPng = resolve(resourcesDir, 'icon.png');
 const splashWebp = resolve(assetsDir, 'snack-attack-splash.webp');
 const splashPng = resolve(resourcesDir, 'splash.png');
 
-await rebuild('icon-v4-avif-', iconSource);
-await rebuild('splash-v4-fixed-avif-', splashSource);
+await rebuild('icon-v4-avif-', iconSource, 8000);
+await rebuild('splash-v4-fixed-avif-', splashSource, 9000);
 
 await sharp(iconSource)
   .resize(1024, 1024, { fit: 'cover', position: 'centre' })
