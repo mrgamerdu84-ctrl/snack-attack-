@@ -17,11 +17,16 @@
     '🍿': { color: '#fff3b0', accent: '#e63946', shape: 'crumb' }, '🌭': { color: '#c1121f', accent: '#fcbf49', shape: 'sauce' }
   };
 
+  const COMBO_WINDOW_MS = 170;
+  const EFFECT_COOLDOWN_MS = 280;
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
+  const lowPowerDevice = reducedMotion || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+
   let overlay = null;
   let pending = [];
   let pendingTimer = null;
-  let comboStarted = false;
-  let crackShown = false;
+  let lastEffectAt = 0;
+
   const random = (min, max) => min + Math.random() * (max - min);
   const cleanup = (node, delay) => window.setTimeout(() => node.remove(), delay);
 
@@ -34,74 +39,122 @@
     return overlay;
   }
 
+  function clearEffects() {
+    if (overlay?.isConnected) overlay.replaceChildren();
+  }
+
   function addFoodChunk(x, y, snack, intensity) {
     const profile = PROFILES[snack] || { color: '#ff5964', accent: '#ffd166', shape: 'pulp' };
-    const angle = random(-Math.PI * 0.92, -Math.PI * 0.08);
-    const distance = random(90, 235) * intensity;
+    const angle = random(-Math.PI * 0.88, -Math.PI * 0.12);
+    const distance = random(75, 145) * intensity;
     const chunk = document.createElement('span');
     chunk.className = `food-impact-chunk food-${profile.shape}`;
     chunk.textContent = snack;
-    chunk.style.left = `${x}px`; chunk.style.top = `${y}px`;
-    chunk.style.setProperty('--food-color', profile.color); chunk.style.setProperty('--food-accent', profile.accent);
-    chunk.style.setProperty('--dx', `${Math.cos(angle) * distance}px`); chunk.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
-    chunk.style.setProperty('--fall', `${random(90, 210)}px`); chunk.style.setProperty('--size', `${random(18, 32) * Math.min(intensity, 1.45)}px`);
-    chunk.style.setProperty('--spin', `${random(-760, 760)}deg`); chunk.style.setProperty('--duration', `${random(760, 1120)}ms`);
-    ensureOverlay().appendChild(chunk); cleanup(chunk, 1300);
+    chunk.style.left = `${x}px`;
+    chunk.style.top = `${y}px`;
+    chunk.style.setProperty('--food-color', profile.color);
+    chunk.style.setProperty('--food-accent', profile.accent);
+    chunk.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+    chunk.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+    chunk.style.setProperty('--fall', `${random(55, 105)}px`);
+    chunk.style.setProperty('--size', `${random(20, 27) * Math.min(intensity, 1.25)}px`);
+    chunk.style.setProperty('--spin', `${random(-320, 320)}deg`);
+    chunk.style.setProperty('--duration', `${random(560, 720)}ms`);
+    ensureOverlay().appendChild(chunk);
+    cleanup(chunk, 850);
   }
 
   function addSplat(x, y, snack, intensity) {
+    if (lowPowerDevice) return;
     const profile = PROFILES[snack] || { color: '#ff5964', accent: '#ffd166' };
     const splat = document.createElement('span');
-    splat.className = 'food-impact-splat'; splat.style.left = `${x}px`; splat.style.top = `${y}px`;
-    splat.style.setProperty('--food-color', profile.color); splat.style.setProperty('--food-accent', profile.accent);
-    splat.style.setProperty('--splat-size', `${random(74, 120) * intensity}px`); splat.style.setProperty('--splat-rotate', `${random(-30, 30)}deg`);
-    ensureOverlay().appendChild(splat); cleanup(splat, 1450);
+    splat.className = 'food-impact-splat';
+    splat.style.left = `${x}px`;
+    splat.style.top = `${y}px`;
+    splat.style.setProperty('--food-color', profile.color);
+    splat.style.setProperty('--food-accent', profile.accent);
+    splat.style.setProperty('--splat-size', `${random(68, 92) * intensity}px`);
+    splat.style.setProperty('--splat-rotate', `${random(-24, 24)}deg`);
+    ensureOverlay().appendChild(splat);
+    cleanup(splat, 900);
   }
 
   function addGlassCrack(x, y, comboSize) {
     const crack = document.createElement('span');
     crack.className = `combo-glass-crack crack-tier-${comboSize >= 9 ? 3 : comboSize >= 7 ? 2 : 1}`;
-    crack.style.left = `${x}px`; crack.style.top = `${y}px`;
-    crack.style.setProperty('--crack-size', `${Math.min(285, 145 + comboSize * 13)}px`); crack.style.setProperty('--crack-rotate', `${random(-24, 24)}deg`);
-    ensureOverlay().appendChild(crack); cleanup(crack, comboSize >= 9 ? 1900 : 1450);
+    crack.style.left = `${x}px`;
+    crack.style.top = `${y}px`;
+    crack.style.setProperty('--crack-size', `${Math.min(210, 120 + comboSize * 9)}px`);
+    crack.style.setProperty('--crack-rotate', `${random(-18, 18)}deg`);
+    ensureOverlay().appendChild(crack);
+    cleanup(crack, 950);
   }
 
-  function comboImpact({ x, y, snack, comboSize = 4, crack = false, intensity = 1 }) {
+  function renderComboImpact({ x, y, snack, comboSize = 4, intensity = 1 }) {
     if (!Number.isFinite(x) || !Number.isFinite(y) || comboSize < 4) return;
-    const power = Math.max(0.85, Math.min(1.6, intensity));
-    addFoodChunk(x, y, snack, power);
-    if (Math.random() > 0.42) addFoodChunk(x, y, snack, power * 0.82);
-    if (crack) {
-      addSplat(x, y, snack, power); addGlassCrack(x, y, comboSize);
-      document.body.classList.add('combo-impact-focus');
-      window.setTimeout(() => document.body.classList.remove('combo-impact-focus'), 260);
-    }
+
+    clearEffects();
+    const power = Math.max(0.9, Math.min(1.3, intensity));
+
+    window.requestAnimationFrame(() => {
+      // Un seul morceau animé au lieu d'un effet par case supprimée.
+      addFoodChunk(x, y, snack, power);
+
+      // Les effets supplémentaires sont réservés aux vrais gros combos.
+      if (comboSize >= 7) addSplat(x, y, snack, power);
+      if (comboSize >= 6) addGlassCrack(x, y, comboSize);
+
+      // Le petit pulse est désactivé sur les appareils modestes.
+      if (!lowPowerDevice && comboSize >= 8) {
+        document.body.classList.add('combo-impact-focus');
+        window.setTimeout(() => document.body.classList.remove('combo-impact-focus'), 140);
+      }
+    });
   }
 
-  function resetBatch() {
-    pending = []; comboStarted = false; crackShown = false; pendingTimer = null;
+  function flushBatch() {
+    const batch = pending;
+    pending = [];
+    pendingTimer = null;
+
+    if (batch.length < 4) return;
+
+    const now = performance.now();
+    if (now - lastEffectAt < EFFECT_COOLDOWN_MS) return;
+    lastEffectAt = now;
+
+    const center = batch[Math.floor(batch.length / 2)];
+    renderComboImpact({
+      ...center,
+      comboSize: batch.length,
+      intensity: batch.length >= 9 ? 1.25 : batch.length >= 7 ? 1.12 : 1
+    });
   }
 
-  // Compatibilité avec la boucle de suppression existante : rien n'est affiché
-  // avant que quatre destructions rapprochées confirment un vrai combo.
+  // La boucle du jeu appelle cette fonction pour chaque snack détruit.
+  // On les regroupe puis on dessine une seule animation par combo.
   function explodeAt(payload) {
-    clearTimeout(pendingTimer);
-    pending.push(payload);
+    const { x, y, snack } = payload || {};
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !snack) return;
 
-    if (!comboStarted && pending.length >= 4) {
-      comboStarted = true;
-      const center = pending[Math.floor(pending.length / 2)];
-      pending.slice(0, 4).forEach((item, index) => {
-        window.setTimeout(() => comboImpact({ ...item, comboSize: pending.length, crack: index === 3, intensity: 1.05 }), index * 35);
-      });
-      crackShown = true;
-    } else if (comboStarted && pending.length <= 7) {
-      comboImpact({ ...payload, comboSize: pending.length, crack: !crackShown, intensity: pending.length >= 7 ? 1.35 : 1.12 });
-      crackShown = true;
-    }
-
-    pendingTimer = window.setTimeout(resetBatch, 240);
+    pending.push({ x, y, snack });
+    window.clearTimeout(pendingTimer);
+    pendingTimer = window.setTimeout(flushBatch, COMBO_WINDOW_MS);
   }
 
-  window.SnackScreenFX = { comboImpact, explodeAt };
+  function comboImpact(payload) {
+    const comboSize = Number(payload?.comboSize) || 4;
+    renderComboImpact({ ...payload, comboSize });
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) return;
+    window.clearTimeout(pendingTimer);
+    pending = [];
+    pendingTimer = null;
+    clearEffects();
+    document.body.classList.remove('combo-impact-focus');
+  });
+
+  window.SnackScreenFX = { comboImpact, explodeAt, clear: clearEffects };
 })();
