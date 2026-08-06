@@ -1,6 +1,16 @@
 
 const SIZE=8;
-const THEMES={fruits:['🍓','🍊','🍇','🍋','🍒','🍑'], legumes:['🥕','🌽','🍆','🥒','🍅','🫑'], petitdej:['🥐','🥞','🍩','🧇','🥯','🍪'], glace:['🍦','🍨','🍧','🧁','🍰','🍭'], fastfood:['🍕','🍟','🍔','🌮','🍿','🌭']};
+const THEMES={
+  fruits:['🍓','🍊','🍇','🍋','🍒','🍑'],
+  legumes:['🥕','🌽','🍆','🥒','🍅','🫑'],
+  petitdej:['🥐','🥞','🍩','🧇','🥯','🍪'],
+  glace:['🍦','🍨','🍧','🧁','🍰','🍭'],
+  fastfood:['🍕','🍟','🍔','🌮','🍿','🌭'],
+  sodas:['🥤','🧋','🥫','🧊','🍹','🫧'],
+  fruitsmer:['🦐','🦀','🦞','🦪','🐙','🦑'],
+  viande:['🥩','🍖','🍗','🥓','🌭','🍔'],
+  poisson:['🐟','🐠','🐡','🍣','🍤','🍥']
+};
 const AVATARS=['😎','🤩','🥳','😋','🦊','🐱','👾','🔥'];
 let FRUITS=THEMES.fruits, selectedTheme=null, selectedAvatar=AVATARS[0];
 let grid=[], score=0, moves=25, level=1, target=1000, timeLeft=90, timer=null, busy=false, over=false, bottles={}, shuffle=2;
@@ -36,44 +46,23 @@ if('speechSynthesis' in window){
 }
 function speakCombo(n){
   if(!voiceEnabled) return;
+  const native = window.SnackNativeFeedback;
+  const voiceId = n>=10?'legendary':n>=8?'mega':n>=5?'super':n>=4?'combo':null;
+  if(voiceId && native?.announce){
+    native.announce(voiceId);
+    return;
+  }
   if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   let text='';
-  if(n>=10) text = ["INSANE ! T'es un monstre !", "DINGUERIE ! Dix d'un coup !", "LÉGENDAIRE !"][Math.floor(Math.random()*3)];
-  else if(n>=8) text = ["MÉGA COMBO !", "ÉNORME !", "OH LA LA !"][Math.floor(Math.random()*3)];
-  else if(n>=7) text = ["Méga combo !", "Incroyable !"][Math.floor(Math.random()*2)];
-  else if(n>=6) text = ["Super combo !", "Bien joué !"][Math.floor(Math.random()*2)];
-  else if(n>=5) text = "Super !";
-  else if(n>=4) text = "Combo !";
+  if(n>=10) text='Légendaire !';
+  else if(n>=8) text='Méga combo !';
+  else if(n>=5) text='Super !';
+  else if(n>=4) text='Combo !';
   else return;
-  // double voix sur très gros
-  if(n>=7){
-    const ut = new SpeechSynthesisUtterance(text);
-    ut.voice=frenchVoice; ut.lang=frenchVoice?frenchVoice.lang:'fr-FR';
-    ut.rate = n>=10?1.15: n>=7?1.05:0.95;
-    ut.pitch = n>=10?1.3: n>=8?1.2:1.1;
-    ut.volume=1;
-    speechSynthesis.speak(ut);
-    if(n>=8){
-      setTimeout(()=>{
-        const ut2=new SpeechSynthesisUtterance(n>=10?"BOUM !":"Wouhou !");
-        ut2.voice=frenchVoice; ut2.lang=ut.lang; ut2.rate=1.2; ut2.pitch=1.4; ut2.volume=0.9;
-        speechSynthesis.speak(ut2);
-      }, n>=10?500:350);
-    }
-  } else if(n>=5){
-    const ut=new SpeechSynthesisUtterance(text);
-    ut.voice=frenchVoice; ut.lang=frenchVoice?frenchVoice.lang:'fr-FR'; ut.rate=1.0; ut.pitch=1.1; ut.volume=0.9;
-    speechSynthesis.speak(ut);
-  }
-  // chaine combo
-  if(multiplier>=2 && n>=4){
-    setTimeout(()=>{
-      const ut=new SpeechSynthesisUtterance(`x ${Math.floor(multiplier)} combo !`);
-      ut.voice=frenchVoice; ut.lang='fr-FR'; ut.rate=1.1; ut.pitch=1.15; ut.volume=0.85;
-      speechSynthesis.speak(ut);
-    }, 600);
-  }
+  const ut=new SpeechSynthesisUtterance(text);
+  ut.voice=frenchVoice; ut.lang=frenchVoice?frenchVoice.lang:'fr-FR'; ut.rate=1.05; ut.pitch=1.15; ut.volume=1;
+  speechSynthesis.speak(ut);
 }
 function getGroup(r,c,g=grid){
   const st=g[idx(r,c)]; if(!st) return [];

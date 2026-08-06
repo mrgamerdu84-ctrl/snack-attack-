@@ -10,76 +10,39 @@
 <link rel="stylesheet" href="v2.css">
 <link rel="stylesheet" href="theme-effects.css">
 <link rel="stylesheet" href="screen-splashes.css">
+<link rel="stylesheet" href="menu-refresh.css">
+<link rel="stylesheet" href="shop.css">
 </head>
 <body class="theme-fruits">
-<div id="appSplash" aria-label="Chargement de Snack Attack">
-<img src="assets/snack-attack-splash.webp" alt="Snack Attack">
-</div>
-
-<div class="start-menu" id="startMenu">
-<div class="start-card">
+<div id="appSplash" aria-label="Chargement de Snack Attack"><img src="assets/snack-attack-splash.webp" alt="Snack Attack"></div>
+<div class="start-menu" id="startMenu"><div class="start-card">
 <h1>🍬 Snack Attack</h1>
-<div style="color:#ffb700;font-family:Fredoka,sans-serif;font-weight:900;margin-top:4px;font-size:14px;letter-spacing:1px">🌟 VERSION 2 • AVENTURE GOURMANDE 🌟</div>
+<div style="color:#ffb700;font-family:Fredoka,sans-serif;font-weight:900;margin-top:4px;font-size:14px;letter-spacing:1px">🌟 VERSION 4 • AVENTURE GOURMANDE 🌟</div>
 <div class="start-sub"><b>AVENTURE + MODE DÉTENTE + BOOSTERS + MONDES</b><br>Choisis ton thème, progresse dans les niveaux ou joue librement sans limite.</div>
 <input id="pseudo" class="pseudo" placeholder="Ton pseudo" maxlength="14">
 <div class="avatar-row" id="avatarRow"></div>
 <div class="theme-grid">
-<button class="t-card" data-theme="fruits"><span style="font-size:22px">🍓🍊🍇</span>Fruits</button>
-<button class="t-card" data-theme="legumes"><span style="font-size:22px">🥕🌽🍆</span>Légumes</button>
-<button class="t-card" data-theme="petitdej"><span style="font-size:22px">🥐🥞🍩</span>Petit-déj</button>
-<button class="t-card" data-theme="glace"><span style="font-size:22px">🍦🍨🍧</span>Glace</button>
-<button class="t-card" data-theme="fastfood"><span style="font-size:22px">🍕🍟🍔</span>Fast-food</button>
+<button class="t-card" data-theme="fruits"><span>🍓🍊🍇</span>Fruits</button>
+<button class="t-card" data-theme="legumes"><span>🥕🌽🍆</span>Légumes</button>
+<button class="t-card" data-theme="petitdej"><span>🥐🥞🍩</span>Petit-déj</button>
+<button class="t-card" data-theme="glace"><span>🍦🍨🍧</span>Glace</button>
+<button class="t-card" data-theme="fastfood"><span>🍕🍟🍔</span>Fast-food</button>
+<button class="t-card" data-theme="sodas"><span>🥤🧋🥫</span>Sodas</button>
+<button class="t-card" data-theme="fruitsmer"><span>🦐🦀🦞</span>Fruits de mer</button>
+<button class="t-card" data-theme="viande"><span>🥩🍖🍗</span>Viandes</button>
+<button class="t-card" data-theme="poisson"><span>🐟🐠🍣</span>Poissons</button>
 </div>
 <button class="mainbtn" id="playBtn" disabled style="width:100%;padding:14px;font-size:15px">CONTINUER L’AVENTURE 🚀</button>
 <button class="mainbtn" id="relaxBtn" disabled style="width:100%;padding:14px;font-size:15px;margin-top:9px;background:linear-gradient(160deg,#45d7a8,#54a7ff)">MODE DÉTENTE 🧘</button>
-</div>
-</div>
-
+</div></div>
 <div class="wrap" id="gameWrap" style="display:none">
-<div class="banner">
-<h1>🍬 Snack Attack</h1>
-<div class="mode-badge">🌟 V2 • BOOSTERS • COMBOS • AVENTURE</div>
-<div class="subtitle" id="welcome"></div>
-</div>
-<div class="hud">
-<div class="stat"><div class="label">Niveau</div><div class="value" id="lvl">1</div></div>
-<div class="stat"><div class="label">Score</div><div class="value" id="sc">0</div><div class="combo-chain" id="chain">COMBO x1</div></div>
-<div class="stat"><div class="label">Coups</div><div class="value" id="mv">25</div></div>
-</div>
-<div class="chip-row">
-<div class="chip"><span>⏱️</span><div><div class="label">Temps</div><div class="cd-v" id="tm">1:30</div></div></div>
-<div class="chip"><span>🔥</span><div><div class="label">Multi</div><div class="cd-v" id="mult">x1.0</div></div></div>
-<div class="chip"><span>🎯</span><div><div class="label">Objectif</div><div class="cd-v" id="obj">0 / 1000</div></div></div>
-</div>
-<div class="progress-wrap"><div class="bar"><div class="fill" id="fill"></div></div></div>
-<div class="bottles" id="bottles"></div>
-<div class="board-frame" id="frame">
-<div id="board"></div>
-<div class="fx-layer" id="fx"></div>
-</div>
-<div class="msg" id="msg">Touche un groupe de 2+ 💥</div>
-<div class="footer">
-<button class="mainbtn" id="voiceBtn" style="background:linear-gradient(160deg,#3ee6b0,#4fc3ff)">📣 Annonce ON</button>
-<button class="mainbtn" id="backBtn" style="background:linear-gradient(160deg,#8a7aff,#a855f7)">↩️ Menu</button>
-<button class="mainbtn" id="shuffleBtn">🔀 Mélanger (2)</button>
-<button class="mainbtn" id="restartBtn">🔄 Recommencer</button>
-</div>
-</div>
-
-<div class="overlay" id="ovWin"><div class="o-card"><div style="font-size:60px">👑</div><h2 style="font-family:Fredoka,sans-serif;color:var(--lemon);margin:8px 0">Niveau <span id="winLvl">1</span> !</h2><div id="winTxt" style="font-size:13px;opacity:0.9;margin-bottom:14px"></div><button class="mainbtn" id="nextBtn" style="width:100%">Niveau suivant ➡️</button></div></div>
-<div class="overlay" id="ovLose"><div class="o-card"><div style="font-size:56px">💥</div><h2 style="font-family:Fredoka,sans-serif;color:var(--lemon)">Partie terminée</h2><div id="loseTxt" style="font-size:13px;opacity:0.85;margin:10px 0 14px"></div><button class="mainbtn" id="retryBtn" style="width:100%">Réessayer 🔄</button></div></div>
-
-<script src="branding.js"></script>
-<script src="native-tts.js"></script>
-<script src="native-feedback.js"></script>
-<script src="game-core.js"></script>
-<script src="voice-combos.js"></script>
-<script src="game-effects.js"></script>
-<script src="game-play.js"></script>
-<script src="voice-controls.js"></script>
-<script src="screen-splashes.js"></script>
-<script src="v2-system.js"></script>
-<script src="audio-fix.js"></script>
-<script src="theme-effects.js"></script>
-</body>
-</html>
+<div class="banner"><h1>🍬 Snack Attack</h1><div class="mode-badge">🌟 V4 • BOOSTERS • COMBOS • AVENTURE</div><div class="subtitle" id="welcome"></div></div>
+<div class="hud"><div class="stat"><div class="label">Niveau</div><div class="value" id="lvl">1</div></div><div class="stat"><div class="label">Score</div><div class="value" id="sc">0</div><div class="combo-chain" id="chain">COMBO x1</div></div><div class="stat"><div class="label">Coups</div><div class="value" id="mv">25</div></div></div>
+<div class="chip-row"><div class="chip"><span>⏱️</span><div><div class="label">Temps</div><div class="cd-v" id="tm">1:30</div></div></div><div class="chip"><span>🔥</span><div><div class="label">Multi</div><div class="cd-v" id="mult">x1.0</div></div></div><div class="chip"><span>🎯</span><div><div class="label">Objectif</div><div class="cd-v" id="obj">0 / 1000</div></div></div></div>
+<div class="progress-wrap"><div class="bar"><div class="fill" id="fill"></div></div></div><div class="bottles" id="bottles"></div>
+<div class="board-frame" id="frame"><div id="board"></div><div class="fx-layer" id="fx"></div></div><div class="msg" id="msg">Touche un groupe de 2+ 💥</div>
+<div class="footer"><button class="mainbtn" id="voiceBtn">📣 Annonce ON</button><button class="mainbtn" id="backBtn">↩️ Menu</button><button class="mainbtn" id="shuffleBtn">🔀 Mélanger (2)</button><button class="mainbtn" id="restartBtn">🔄 Recommencer</button></div></div>
+<div class="overlay" id="ovWin"><div class="o-card"><div style="font-size:60px">👑</div><h2>Niveau <span id="winLvl">1</span> !</h2><div id="winTxt"></div><button class="mainbtn" id="nextBtn">Niveau suivant ➡️</button></div></div>
+<div class="overlay" id="ovLose"><div class="o-card"><div style="font-size:56px">💥</div><h2>Partie terminée</h2><div id="loseTxt"></div><button class="mainbtn" id="retryBtn">Réessayer 🔄</button></div></div>
+<script src="branding.js"></script><script src="native-tts.js"></script><script src="native-feedback.js"></script><script src="game-core.js"></script><script src="voice-combos.js"></script><script src="game-effects.js"></script><script src="game-play.js"></script><script src="voice-controls.js"></script><script src="screen-splashes.js"></script><script src="v2-system.js"></script><script src="audio-fix.js"></script><script src="theme-effects.js"></script><script src="glass-crash-extension.js"></script><script src="shop-config.js"></script><script src="shop.js"></script>
+</body></html>

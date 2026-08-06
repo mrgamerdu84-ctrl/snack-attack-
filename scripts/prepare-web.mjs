@@ -8,24 +8,8 @@ const rootDir = resolve(scriptDir, '..');
 const webDir = resolve(rootDir, 'www');
 
 const requiredFiles = [
-  'index.html',
-  'style.css',
-  'branding.css',
-  'v2.css',
-  'theme-effects.css',
-  'screen-splashes.css',
-  'glass-crash-extension.css',
-  'branding.js',
-  'game-core.js',
-  'game-effects.js',
-  'game-play.js',
-  'voice-combos.js',
-  'voice-controls.js',
-  'v2-system.js',
-  'audio-fix.js',
-  'theme-effects.js',
-  'screen-splashes.js',
-  'glass-crash-extension.js'
+  'index.html','style.css','branding.css','v2.css','theme-effects.css','screen-splashes.css','glass-crash-extension.css','menu-refresh.css','shop.css',
+  'branding.js','game-core.js','game-effects.js','game-play.js','voice-combos.js','voice-controls.js','v2-system.js','audio-fix.js','theme-effects.js','screen-splashes.js','glass-crash-extension.js','shop-config.js','shop.js'
 ];
 
 const optionalDirectories = ['assets', 'images', 'audio'];
@@ -49,26 +33,7 @@ for (const directory of optionalDirectories) {
   }
 }
 
-await build({
-  entryPoints: [resolve(rootDir, 'src/native-tts.js')],
-  bundle: true,
-  outfile: resolve(webDir, 'native-tts.js'),
-  format: 'iife',
-  platform: 'browser',
-  target: ['es2020'],
-  minify: true,
-  sourcemap: false
-});
+await build({ entryPoints:[resolve(rootDir,'src/native-tts.js')],bundle:true,outfile:resolve(webDir,'native-tts.js'),format:'iife',platform:'browser',target:['es2020'],minify:true,sourcemap:false });
+await build({ entryPoints:[resolve(rootDir,'src/native-feedback.js')],bundle:true,outfile:resolve(webDir,'native-feedback.js'),format:'iife',platform:'browser',target:['es2020'],minify:true,sourcemap:false });
 
-await build({
-  entryPoints: [resolve(rootDir, 'src/native-feedback.js')],
-  bundle: true,
-  outfile: resolve(webDir, 'native-feedback.js'),
-  format: 'iife',
-  platform: 'browser',
-  target: ['es2020'],
-  minify: true,
-  sourcemap: false
-});
-
-console.log('Snack Attack avec mode détente, catégories étendues et effets de vitre préparé dans www/.');
+console.log('Snack Attack V3 préparé dans www/.');

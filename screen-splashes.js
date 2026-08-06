@@ -1,50 +1,34 @@
 (() => {
   const PROFILES = {
-    '🍓': { primary: '#ef233c', secondary: '#ff6b81', kind: 'juice', pieces: ['seed', 'pulp'] },
-    '🍊': { primary: '#ff7a00', secondary: '#ffc145', kind: 'juice', pieces: ['pulp', 'drop'] },
-    '🍇': { primary: '#7b2cbf', secondary: '#c77dff', kind: 'juice', pieces: ['drop', 'pulp'] },
-    '🍋': { primary: '#ffd60a', secondary: '#fff3a3', kind: 'juice', pieces: ['pulp', 'seed'] },
-    '🍒': { primary: '#d90429', secondary: '#ff4d6d', kind: 'juice', pieces: ['drop', 'pulp'] },
-    '🍑': { primary: '#ff8fab', secondary: '#ffc2d1', kind: 'juice', pieces: ['pulp', 'drop'] },
-
-    '🥕': { primary: '#f77f00', secondary: '#ffb703', kind: 'vegetable', pieces: ['chip', 'leaf'] },
-    '🌽': { primary: '#ffd60a', secondary: '#8ac926', kind: 'vegetable', pieces: ['kernel', 'leaf'] },
-    '🍆': { primary: '#6a1b9a', secondary: '#ab47bc', kind: 'vegetable', pieces: ['chip', 'seed'] },
-    '🥒': { primary: '#43a047', secondary: '#b7e4c7', kind: 'vegetable', pieces: ['chip', 'seed'] },
-    '🍅': { primary: '#e63946', secondary: '#ff758f', kind: 'vegetable', pieces: ['pulp', 'seed'] },
-    '🫑': { primary: '#2d9d45', secondary: '#f94144', kind: 'vegetable', pieces: ['chip', 'seed'] },
-
-    '🥐': { primary: '#c9792b', secondary: '#ffd089', kind: 'crumb', pieces: ['crumb', 'flake'] },
-    '🥞': { primary: '#c97b2d', secondary: '#f4c27a', kind: 'crumb', pieces: ['crumb', 'syrup'] },
-    '🍩': { primary: '#ff70a6', secondary: '#8d5524', kind: 'crumb', pieces: ['crumb', 'sugar'] },
-    '🧇': { primary: '#c9822c', secondary: '#f2c078', kind: 'crumb', pieces: ['crumb', 'flake'] },
-    '🥯': { primary: '#b66a2c', secondary: '#f0c58f', kind: 'crumb', pieces: ['crumb', 'seed'] },
-    '🍪': { primary: '#9c5b2c', secondary: '#5f3216', kind: 'crumb', pieces: ['crumb', 'chip'] },
-
-    '🍦': { primary: '#fff0f6', secondary: '#ff9fcb', kind: 'cream', pieces: ['cream', 'frost'] },
-    '🍨': { primary: '#f8c8dc', secondary: '#bde0fe', kind: 'cream', pieces: ['cream', 'frost'] },
-    '🍧': { primary: '#80e1ff', secondary: '#ff70a6', kind: 'ice', pieces: ['ice', 'frost'] },
-    '🧁': { primary: '#ff9fcb', secondary: '#f4c27a', kind: 'cream', pieces: ['cream', 'crumb'] },
-    '🍰': { primary: '#fff0d6', secondary: '#ff758f', kind: 'cake', pieces: ['sponge', 'cream'] },
-    '🍭': { primary: '#ff4d6d', secondary: '#4cc9f0', kind: 'sugar', pieces: ['shard', 'sugar'] },
-
-    '🍕': { primary: '#f94144', secondary: '#ffd166', kind: 'sauce', pieces: ['cheese', 'crumb'] },
-    '🍟': { primary: '#fcbf49', secondary: '#e63946', kind: 'crumb', pieces: ['strip', 'salt'] },
-    '🍔': { primary: '#8d5524', secondary: '#ffd166', kind: 'sauce', pieces: ['crumb', 'cheese'] },
-    '🌮': { primary: '#d28b36', secondary: '#6a994e', kind: 'crumb', pieces: ['crumb', 'leaf'] },
-    '🍿': { primary: '#fff3b0', secondary: '#e63946', kind: 'crumb', pieces: ['flake', 'salt'] },
-    '🌭': { primary: '#c1121f', secondary: '#fcbf49', kind: 'sauce', pieces: ['sauce', 'crumb'] }
+    '🍓': { color: '#e63946', accent: '#ff758f', shape: 'pulp' }, '🍊': { color: '#ff7a00', accent: '#ffc145', shape: 'pulp' },
+    '🍇': { color: '#7b2cbf', accent: '#c77dff', shape: 'berry' }, '🍋': { color: '#ffd60a', accent: '#fff3a3', shape: 'pulp' },
+    '🍒': { color: '#c1121f', accent: '#ff4d6d', shape: 'berry' }, '🍑': { color: '#ff8fab', accent: '#ffd0dc', shape: 'pulp' },
+    '🥕': { color: '#f77f00', accent: '#ffb703', shape: 'chip' }, '🌽': { color: '#ffd60a', accent: '#8ac926', shape: 'kernel' },
+    '🍆': { color: '#6a1b9a', accent: '#ab47bc', shape: 'chip' }, '🥒': { color: '#43a047', accent: '#b7e4c7', shape: 'chip' },
+    '🍅': { color: '#e63946', accent: '#ff758f', shape: 'pulp' }, '🫑': { color: '#2d9d45', accent: '#f94144', shape: 'chip' },
+    '🥐': { color: '#c9792b', accent: '#ffd089', shape: 'crumb' }, '🥞': { color: '#c97b2d', accent: '#f4c27a', shape: 'crumb' },
+    '🍩': { color: '#ff70a6', accent: '#8d5524', shape: 'crumb' }, '🧇': { color: '#c9822c', accent: '#f2c078', shape: 'crumb' },
+    '🥯': { color: '#b66a2c', accent: '#f0c58f', shape: 'crumb' }, '🍪': { color: '#9c5b2c', accent: '#5f3216', shape: 'crumb' },
+    '🍦': { color: '#fff0f6', accent: '#ff9fcb', shape: 'cream' }, '🍨': { color: '#f8c8dc', accent: '#bde0fe', shape: 'cream' },
+    '🍧': { color: '#80e1ff', accent: '#ff70a6', shape: 'ice' }, '🧁': { color: '#ff9fcb', accent: '#f4c27a', shape: 'cream' },
+    '🍰': { color: '#fff0d6', accent: '#ff758f', shape: 'cake' }, '🍭': { color: '#ff4d6d', accent: '#4cc9f0', shape: 'sugar' },
+    '🍕': { color: '#f94144', accent: '#ffd166', shape: 'sauce' }, '🍟': { color: '#fcbf49', accent: '#e63946', shape: 'strip' },
+    '🍔': { color: '#8d5524', accent: '#ffd166', shape: 'crumb' }, '🌮': { color: '#d28b36', accent: '#6a994e', shape: 'crumb' },
+    '🍿': { color: '#fff3b0', accent: '#e63946', shape: 'crumb' }, '🌭': { color: '#c1121f', accent: '#fcbf49', shape: 'sauce' }
   };
 
-  const DEFAULTS = {
-    fruits: { primary: '#ff4d6d', secondary: '#ffb703', kind: 'juice', pieces: ['drop', 'pulp'] },
-    legumes: { primary: '#55a630', secondary: '#f77f00', kind: 'vegetable', pieces: ['chip', 'leaf'] },
-    petitdej: { primary: '#c97b2d', secondary: '#f4c27a', kind: 'crumb', pieces: ['crumb', 'flake'] },
-    glace: { primary: '#bde0fe', secondary: '#ffafcc', kind: 'cream', pieces: ['cream', 'frost'] },
-    fastfood: { primary: '#f94144', secondary: '#ffd166', kind: 'sauce', pieces: ['sauce', 'crumb'] }
-  };
+  const COMBO_WINDOW_MS = 170;
+  const EFFECT_COOLDOWN_MS = 280;
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
+  const lowPowerDevice = reducedMotion || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
 
   let overlay = null;
+  let pending = [];
+  let pendingTimer = null;
+  let lastEffectAt = 0;
+
+  const random = (min, max) => min + Math.random() * (max - min);
+  const cleanup = (node, delay) => window.setTimeout(() => node.remove(), delay);
 
   function ensureOverlay() {
     if (overlay?.isConnected) return overlay;
@@ -55,91 +39,122 @@
     return overlay;
   }
 
-  function currentTheme() {
-    const className = [...document.body.classList].find((name) => name.startsWith('theme-'));
-    return className ? className.slice(6) : 'fruits';
+  function clearEffects() {
+    if (overlay?.isConnected) overlay.replaceChildren();
   }
 
-  function random(min, max) {
-    return min + Math.random() * (max - min);
+  function addFoodChunk(x, y, snack, intensity) {
+    const profile = PROFILES[snack] || { color: '#ff5964', accent: '#ffd166', shape: 'pulp' };
+    const angle = random(-Math.PI * 0.88, -Math.PI * 0.12);
+    const distance = random(75, 145) * intensity;
+    const chunk = document.createElement('span');
+    chunk.className = `food-impact-chunk food-${profile.shape}`;
+    chunk.textContent = snack;
+    chunk.style.left = `${x}px`;
+    chunk.style.top = `${y}px`;
+    chunk.style.setProperty('--food-color', profile.color);
+    chunk.style.setProperty('--food-accent', profile.accent);
+    chunk.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+    chunk.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+    chunk.style.setProperty('--fall', `${random(55, 105)}px`);
+    chunk.style.setProperty('--size', `${random(20, 27) * Math.min(intensity, 1.25)}px`);
+    chunk.style.setProperty('--spin', `${random(-320, 320)}deg`);
+    chunk.style.setProperty('--duration', `${random(560, 720)}ms`);
+    ensureOverlay().appendChild(chunk);
+    cleanup(chunk, 850);
   }
 
-  function choose(values) {
-    return values[Math.floor(Math.random() * values.length)];
-  }
-
-  function cleanup(node, delay = 1800) {
-    window.setTimeout(() => node.remove(), delay);
-  }
-
-  function createGlassSplat(x, y, profile, intensity) {
+  function addSplat(x, y, snack, intensity) {
+    if (lowPowerDevice) return;
+    const profile = PROFILES[snack] || { color: '#ff5964', accent: '#ffd166' };
     const splat = document.createElement('span');
-    splat.className = `glass-splat splat-${profile.kind}`;
+    splat.className = 'food-impact-splat';
     splat.style.left = `${x}px`;
     splat.style.top = `${y}px`;
-    splat.style.setProperty('--primary', profile.primary);
-    splat.style.setProperty('--secondary', profile.secondary);
-    splat.style.setProperty('--splat-size', `${random(46, 72) * intensity}px`);
-    splat.style.setProperty('--splat-rotate', `${random(-35, 35)}deg`);
+    splat.style.setProperty('--food-color', profile.color);
+    splat.style.setProperty('--food-accent', profile.accent);
+    splat.style.setProperty('--splat-size', `${random(68, 92) * intensity}px`);
+    splat.style.setProperty('--splat-rotate', `${random(-24, 24)}deg`);
     ensureOverlay().appendChild(splat);
-    cleanup(splat, 1500);
+    cleanup(splat, 900);
   }
 
-  function createDroplet(x, y, profile, intensity) {
-    const angle = random(0, Math.PI * 2);
-    const distance = random(38, 145) * intensity;
-    const particle = document.createElement('span');
-    const piece = choose(profile.pieces);
-    particle.className = `glass-particle piece-${piece} material-${profile.kind}`;
-    particle.style.left = `${x}px`;
-    particle.style.top = `${y}px`;
-    particle.style.setProperty('--primary', Math.random() > 0.35 ? profile.primary : profile.secondary);
-    particle.style.setProperty('--secondary', profile.secondary);
-    particle.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
-    particle.style.setProperty('--dy', `${Math.sin(angle) * distance - random(18, 70)}px`);
-    particle.style.setProperty('--fall', `${random(45, 150)}px`);
-    particle.style.setProperty('--particle-size', `${random(5, 15) * Math.min(1.4, intensity)}px`);
-    particle.style.setProperty('--particle-rotate', `${random(-620, 620)}deg`);
-    particle.style.setProperty('--particle-duration', `${random(650, 1180)}ms`);
-    ensureOverlay().appendChild(particle);
-    cleanup(particle, 1450);
+  function addGlassCrack(x, y, comboSize) {
+    const crack = document.createElement('span');
+    crack.className = `combo-glass-crack crack-tier-${comboSize >= 9 ? 3 : comboSize >= 7 ? 2 : 1}`;
+    crack.style.left = `${x}px`;
+    crack.style.top = `${y}px`;
+    crack.style.setProperty('--crack-size', `${Math.min(210, 120 + comboSize * 9)}px`);
+    crack.style.setProperty('--crack-rotate', `${random(-18, 18)}deg`);
+    ensureOverlay().appendChild(crack);
+    cleanup(crack, 950);
   }
 
-  function createDrip(x, y, profile, intensity) {
-    if (!['juice', 'cream', 'sauce', 'vegetable'].includes(profile.kind)) return;
-    const drip = document.createElement('span');
-    drip.className = `glass-drip material-${profile.kind}`;
-    drip.style.left = `${x + random(-26, 26) * intensity}px`;
-    drip.style.top = `${y + random(-12, 18)}px`;
-    drip.style.setProperty('--primary', profile.primary);
-    drip.style.setProperty('--drip-width', `${random(5, 11) * intensity}px`);
-    drip.style.setProperty('--drip-height', `${random(28, 78) * intensity}px`);
-    ensureOverlay().appendChild(drip);
-    cleanup(drip, 1900);
+  function renderComboImpact({ x, y, snack, comboSize = 4, intensity = 1 }) {
+    if (!Number.isFinite(x) || !Number.isFinite(y) || comboSize < 4) return;
+
+    clearEffects();
+    const power = Math.max(0.9, Math.min(1.3, intensity));
+
+    window.requestAnimationFrame(() => {
+      // Un seul morceau animé au lieu d'un effet par case supprimée.
+      addFoodChunk(x, y, snack, power);
+
+      // Les effets supplémentaires sont réservés aux vrais gros combos.
+      if (comboSize >= 7) addSplat(x, y, snack, power);
+      if (comboSize >= 6) addGlassCrack(x, y, comboSize);
+
+      // Le petit pulse est désactivé sur les appareils modestes.
+      if (!lowPowerDevice && comboSize >= 8) {
+        document.body.classList.add('combo-impact-focus');
+        window.setTimeout(() => document.body.classList.remove('combo-impact-focus'), 140);
+      }
+    });
   }
 
-  function createFrost(x, y, profile, intensity) {
-    if (!['cream', 'ice'].includes(profile.kind)) return;
-    const frost = document.createElement('span');
-    frost.className = 'glass-frost';
-    frost.style.left = `${x}px`;
-    frost.style.top = `${y}px`;
-    frost.style.setProperty('--primary', profile.primary);
-    frost.style.setProperty('--frost-size', `${random(75, 125) * intensity}px`);
-    ensureOverlay().appendChild(frost);
-    cleanup(frost, 1700);
+  function flushBatch() {
+    const batch = pending;
+    pending = [];
+    pendingTimer = null;
+
+    if (batch.length < 4) return;
+
+    const now = performance.now();
+    if (now - lastEffectAt < EFFECT_COOLDOWN_MS) return;
+    lastEffectAt = now;
+
+    const center = batch[Math.floor(batch.length / 2)];
+    renderComboImpact({
+      ...center,
+      comboSize: batch.length,
+      intensity: batch.length >= 9 ? 1.25 : batch.length >= 7 ? 1.12 : 1
+    });
   }
 
-  function explodeAt({ x, y, snack, theme = currentTheme(), intensity = 1 }) {
-    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-    const profile = PROFILES[snack] || DEFAULTS[theme] || DEFAULTS.fruits;
-    const power = Math.max(0.8, Math.min(1.9, intensity));
-    createGlassSplat(x, y, profile, power);
-    createDrip(x, y, profile, power);
-    createFrost(x, y, profile, power);
-    const amount = Math.round(9 + power * 7);
-    for (let index = 0; index < amount; index += 1) createDroplet(x, y, profile, power);
+  // La boucle du jeu appelle cette fonction pour chaque snack détruit.
+  // On les regroupe puis on dessine une seule animation par combo.
+  function explodeAt(payload) {
+    const { x, y, snack } = payload || {};
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !snack) return;
+
+    pending.push({ x, y, snack });
+    window.clearTimeout(pendingTimer);
+    pendingTimer = window.setTimeout(flushBatch, COMBO_WINDOW_MS);
   }
 
-  window.SnackScreenFX = { explodeAt };
+  function comboImpact(payload) {
+    const comboSize = Number(payload?.comboSize) || 4;
+    renderComboImpact({ ...payload, comboSize });
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) return;
+    window.clearTimeout(pendingTimer);
+    pending = [];
+    pendingTimer = null;
+    clearEffects();
+    document.body.classList.remove('combo-impact-focus');
+  });
+
+  window.SnackScreenFX = { comboImpact, explodeAt, clear: clearEffects };
 })();
